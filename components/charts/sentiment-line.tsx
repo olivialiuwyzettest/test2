@@ -10,6 +10,7 @@ import {
   YAxis,
 } from "recharts";
 import type { HistoryDay } from "@/lib/schema";
+import { cn } from "@/lib/ui/cn";
 
 function tickLabel(date: string) {
   const [y, m, d] = date.split("-");
@@ -17,7 +18,13 @@ function tickLabel(date: string) {
   return `${m}/${d}`;
 }
 
-export function SentimentLineChart({ days }: { days: HistoryDay[] }) {
+export function SentimentLineChart({
+  days,
+  className,
+}: {
+  days: HistoryDay[];
+  className?: string;
+}) {
   const data = days.map((d) => ({
     date: d.date,
     sentimentIndex: d.sentimentIndex,
@@ -25,7 +32,7 @@ export function SentimentLineChart({ days }: { days: HistoryDay[] }) {
   }));
 
   return (
-    <div className="h-64 w-full">
+    <div className={cn("h-64 w-full", className)}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 10, right: 16, bottom: 0, left: 0 }}>
           <defs>
@@ -70,4 +77,3 @@ export function SentimentLineChart({ days }: { days: HistoryDay[] }) {
     </div>
   );
 }
-

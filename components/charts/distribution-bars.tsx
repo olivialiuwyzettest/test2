@@ -11,10 +11,12 @@ import {
   YAxis,
 } from "recharts";
 import type { SentimentDistribution } from "@/lib/schema";
+import { cn } from "@/lib/ui/cn";
 
 export function DistributionBars(props: {
   today: SentimentDistribution;
   yesterday: SentimentDistribution | null;
+  className?: string;
 }) {
   const data = [
     {
@@ -36,7 +38,7 @@ export function DistributionBars(props: {
   ].filter(Boolean) as Array<Record<string, string | number>>;
 
   return (
-    <div className="h-56 w-full">
+    <div className={cn("h-56 w-full", props.className)}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 10, right: 16, bottom: 0, left: 0 }}>
           <CartesianGrid strokeDasharray="4 6" opacity={0.35} />
@@ -64,4 +66,3 @@ export function DistributionBars(props: {
     </div>
   );
 }
-

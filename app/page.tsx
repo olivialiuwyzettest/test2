@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { brandConfig } from "@/config/brands";
 import { DistributionBars } from "@/components/charts/distribution-bars";
 import { SentimentLineChart } from "@/components/charts/sentiment-line";
@@ -6,6 +7,7 @@ import { MentionList } from "@/components/mention-list";
 import { SectionHeading } from "@/components/section-heading";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -81,6 +83,12 @@ export default async function HomePage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/tv">TV Mode</Link>
+          </Button>
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/methodology">Methodology</Link>
+          </Button>
           <ThemeToggle />
         </div>
       </header>
