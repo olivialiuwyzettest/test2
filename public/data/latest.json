@@ -1,0 +1,551 @@
+{
+  "timezone": "America/Los_Angeles",
+  "generatedAt": "2026-02-09T20:45:50.381Z",
+  "today": {
+    "date": "2026-02-09",
+    "timezone": "America/Los_Angeles",
+    "generatedAt": "2026-02-09T20:47:08.160Z",
+    "totals": {
+      "mentions": 18,
+      "mentionsByBrand": {
+        "Wyze": 8,
+        "Ring": 2,
+        "Arlo": 1,
+        "Eufy": 1,
+        "Google Nest": 2,
+        "Blink": 2,
+        "Reolink": 2
+      }
+    },
+    "sentimentAvg": {
+      "overall": -0.1111111111111111,
+      "indexOverall": 44,
+      "byBrand": {
+        "Wyze": -0.09375,
+        "Ring": -0.125,
+        "Arlo": -0.25,
+        "Eufy": -0.25,
+        "Google Nest": 0,
+        "Blink": -0.125,
+        "Reolink": -0.125
+      }
+    },
+    "sentimentDistribution": {
+      "overall": {
+        "positive": 0,
+        "neutral": 10,
+        "negative": 8,
+        "unknown": 0
+      },
+      "byBrand": {
+        "Wyze": {
+          "positive": 0,
+          "neutral": 5,
+          "negative": 3,
+          "unknown": 0
+        },
+        "Ring": {
+          "positive": 0,
+          "neutral": 1,
+          "negative": 1,
+          "unknown": 0
+        },
+        "Arlo": {
+          "positive": 0,
+          "neutral": 0,
+          "negative": 1,
+          "unknown": 0
+        },
+        "Eufy": {
+          "positive": 0,
+          "neutral": 0,
+          "negative": 1,
+          "unknown": 0
+        },
+        "Google Nest": {
+          "positive": 0,
+          "neutral": 2,
+          "negative": 0,
+          "unknown": 0
+        },
+        "Blink": {
+          "positive": 0,
+          "neutral": 1,
+          "negative": 1,
+          "unknown": 0
+        },
+        "Reolink": {
+          "positive": 0,
+          "neutral": 1,
+          "negative": 1,
+          "unknown": 0
+        }
+      }
+    },
+    "topicsTop": [
+      {
+        "topic": "AI Detection",
+        "count": 5,
+        "deltaVsYesterday": 0
+      },
+      {
+        "topic": "General",
+        "count": 5,
+        "deltaVsYesterday": 1
+      },
+      {
+        "topic": "Privacy",
+        "count": 3,
+        "deltaVsYesterday": 0
+      },
+      {
+        "topic": "Subscription / Pricing",
+        "count": 2,
+        "deltaVsYesterday": 1
+      },
+      {
+        "topic": "Connectivity",
+        "count": 2,
+        "deltaVsYesterday": -2
+      },
+      {
+        "topic": "App / Firmware",
+        "count": 2,
+        "deltaVsYesterday": 1
+      },
+      {
+        "topic": "Video Quality",
+        "count": 2,
+        "deltaVsYesterday": 1
+      },
+      {
+        "topic": "Battery / Power",
+        "count": 1,
+        "deltaVsYesterday": 0
+      },
+      {
+        "topic": "Support",
+        "count": 1,
+        "deltaVsYesterday": -1
+      },
+      {
+        "topic": "Setup",
+        "count": 1,
+        "deltaVsYesterday": -2
+      }
+    ],
+    "driversPositive": [],
+    "driversNegative": [
+      {
+        "topic": "General",
+        "count": 3,
+        "explanation": "Recurring theme in mentions."
+      },
+      {
+        "topic": "Connectivity",
+        "count": 2,
+        "explanation": "Recurring theme in mentions."
+      },
+      {
+        "topic": "Subscription / Pricing",
+        "count": 1,
+        "explanation": "Mostly about \"price increase\"."
+      },
+      {
+        "topic": "AI Detection",
+        "count": 1,
+        "explanation": "Recurring theme in mentions."
+      },
+      {
+        "topic": "Support",
+        "count": 1,
+        "explanation": "Recurring theme in mentions."
+      },
+      {
+        "topic": "Setup",
+        "count": 1,
+        "explanation": "Recurring theme in mentions."
+      }
+    ],
+    "shareOfVoiceByBrand": [
+      {
+        "brand": "Wyze",
+        "mentions": 8,
+        "share": 0.4444444444444444
+      },
+      {
+        "brand": "Ring",
+        "mentions": 2,
+        "share": 0.1111111111111111
+      },
+      {
+        "brand": "Google Nest",
+        "mentions": 2,
+        "share": 0.1111111111111111
+      },
+      {
+        "brand": "Blink",
+        "mentions": 2,
+        "share": 0.1111111111111111
+      },
+      {
+        "brand": "Reolink",
+        "mentions": 2,
+        "share": 0.1111111111111111
+      },
+      {
+        "brand": "Arlo",
+        "mentions": 1,
+        "share": 0.05555555555555555
+      },
+      {
+        "brand": "Eufy",
+        "mentions": 1,
+        "share": 0.05555555555555555
+      }
+    ],
+    "competitorSummary": [
+      {
+        "brand": "Wyze",
+        "mentions": 8,
+        "share": 0.4444444444444444,
+        "sentimentAvg": -0.09375,
+        "mentionsDelta": -1,
+        "sentimentDelta": 0.017361111111111105
+      },
+      {
+        "brand": "Ring",
+        "mentions": 2,
+        "share": 0.1111111111111111,
+        "sentimentAvg": -0.125,
+        "mentionsDelta": 1,
+        "sentimentDelta": -0.375
+      },
+      {
+        "brand": "Google Nest",
+        "mentions": 2,
+        "share": 0.1111111111111111,
+        "sentimentAvg": 0,
+        "mentionsDelta": 0,
+        "sentimentDelta": 0
+      },
+      {
+        "brand": "Blink",
+        "mentions": 2,
+        "share": 0.1111111111111111,
+        "sentimentAvg": -0.125,
+        "mentionsDelta": 2,
+        "sentimentDelta": -0.125
+      },
+      {
+        "brand": "Reolink",
+        "mentions": 2,
+        "share": 0.1111111111111111,
+        "sentimentAvg": -0.125,
+        "mentionsDelta": 1,
+        "sentimentDelta": -0.125
+      },
+      {
+        "brand": "Arlo",
+        "mentions": 1,
+        "share": 0.05555555555555555,
+        "sentimentAvg": -0.25,
+        "mentionsDelta": -1,
+        "sentimentDelta": -0.25
+      },
+      {
+        "brand": "Eufy",
+        "mentions": 1,
+        "share": 0.05555555555555555,
+        "sentimentAvg": -0.25,
+        "mentionsDelta": -1,
+        "sentimentDelta": -0.375
+      }
+    ],
+    "insights": [
+      "Sentiment is down 5 pts vs yesterday.",
+      "Volume is more by 1 mentions vs yesterday.",
+      "Top drag: \"General\" (3)."
+    ],
+    "alerts": {
+      "negativeSpike": true,
+      "mentionSpike": false,
+      "reasons": [
+        "Negative share jumped vs yesterday."
+      ]
+    }
+  },
+  "yesterday": {
+    "date": "2026-02-08",
+    "timezone": "America/Los_Angeles",
+    "generatedAt": "2026-02-08T20:47:08.160Z",
+    "totals": {
+      "mentions": 17,
+      "mentionsByBrand": {
+        "Wyze": 9,
+        "Ring": 1,
+        "Arlo": 2,
+        "Eufy": 2,
+        "Google Nest": 2,
+        "Blink": 0,
+        "Reolink": 1
+      }
+    },
+    "sentimentAvg": {
+      "overall": -0.029411764705882353,
+      "indexOverall": 49,
+      "byBrand": {
+        "Wyze": -0.1111111111111111,
+        "Ring": 0.25,
+        "Arlo": 0,
+        "Eufy": 0.125,
+        "Google Nest": 0,
+        "Blink": 0,
+        "Reolink": 0
+      }
+    },
+    "sentimentDistribution": {
+      "overall": {
+        "positive": 3,
+        "neutral": 9,
+        "negative": 5,
+        "unknown": 0
+      },
+      "byBrand": {
+        "Wyze": {
+          "positive": 1,
+          "neutral": 3,
+          "negative": 5,
+          "unknown": 0
+        },
+        "Ring": {
+          "positive": 1,
+          "neutral": 0,
+          "negative": 0,
+          "unknown": 0
+        },
+        "Arlo": {
+          "positive": 0,
+          "neutral": 2,
+          "negative": 0,
+          "unknown": 0
+        },
+        "Eufy": {
+          "positive": 1,
+          "neutral": 1,
+          "negative": 0,
+          "unknown": 0
+        },
+        "Google Nest": {
+          "positive": 0,
+          "neutral": 2,
+          "negative": 0,
+          "unknown": 0
+        },
+        "Blink": {
+          "positive": 0,
+          "neutral": 0,
+          "negative": 0,
+          "unknown": 0
+        },
+        "Reolink": {
+          "positive": 0,
+          "neutral": 1,
+          "negative": 0,
+          "unknown": 0
+        }
+      }
+    },
+    "topicsTop": [
+      {
+        "topic": "AI Detection",
+        "count": 5
+      },
+      {
+        "topic": "Connectivity",
+        "count": 4
+      },
+      {
+        "topic": "General",
+        "count": 4
+      },
+      {
+        "topic": "Setup",
+        "count": 3
+      },
+      {
+        "topic": "Privacy",
+        "count": 3
+      },
+      {
+        "topic": "Support",
+        "count": 2
+      },
+      {
+        "topic": "App / Firmware",
+        "count": 1
+      },
+      {
+        "topic": "Battery / Power",
+        "count": 1
+      },
+      {
+        "topic": "Subscription / Pricing",
+        "count": 1
+      },
+      {
+        "topic": "Video Quality",
+        "count": 1
+      }
+    ],
+    "driversPositive": [
+      {
+        "topic": "Connectivity",
+        "count": 1,
+        "explanation": "Recurring theme in mentions."
+      },
+      {
+        "topic": "Privacy",
+        "count": 1,
+        "explanation": "Recurring theme in mentions."
+      },
+      {
+        "topic": "Setup",
+        "count": 1,
+        "explanation": "Recurring theme in mentions."
+      },
+      {
+        "topic": "AI Detection",
+        "count": 1,
+        "explanation": "Recurring theme in mentions."
+      }
+    ],
+    "driversNegative": [
+      {
+        "topic": "Connectivity",
+        "count": 3,
+        "explanation": "Recurring theme in mentions."
+      },
+      {
+        "topic": "General",
+        "count": 2,
+        "explanation": "Recurring theme in mentions."
+      },
+      {
+        "topic": "Privacy",
+        "count": 1,
+        "explanation": "Recurring theme in mentions."
+      },
+      {
+        "topic": "AI Detection",
+        "count": 1,
+        "explanation": "Recurring theme in mentions."
+      }
+    ],
+    "shareOfVoiceByBrand": [
+      {
+        "brand": "Wyze",
+        "mentions": 9,
+        "share": 0.5294117647058824
+      },
+      {
+        "brand": "Arlo",
+        "mentions": 2,
+        "share": 0.11764705882352941
+      },
+      {
+        "brand": "Eufy",
+        "mentions": 2,
+        "share": 0.11764705882352941
+      },
+      {
+        "brand": "Google Nest",
+        "mentions": 2,
+        "share": 0.11764705882352941
+      },
+      {
+        "brand": "Ring",
+        "mentions": 1,
+        "share": 0.058823529411764705
+      },
+      {
+        "brand": "Reolink",
+        "mentions": 1,
+        "share": 0.058823529411764705
+      },
+      {
+        "brand": "Blink",
+        "mentions": 0,
+        "share": 0
+      }
+    ],
+    "competitorSummary": [
+      {
+        "brand": "Wyze",
+        "mentions": 9,
+        "share": 0.5294117647058824,
+        "sentimentAvg": -0.1111111111111111,
+        "mentionsDelta": 9,
+        "sentimentDelta": -0.1111111111111111
+      },
+      {
+        "brand": "Arlo",
+        "mentions": 2,
+        "share": 0.11764705882352941,
+        "sentimentAvg": 0,
+        "mentionsDelta": 2,
+        "sentimentDelta": 0
+      },
+      {
+        "brand": "Eufy",
+        "mentions": 2,
+        "share": 0.11764705882352941,
+        "sentimentAvg": 0.125,
+        "mentionsDelta": 2,
+        "sentimentDelta": 0.125
+      },
+      {
+        "brand": "Google Nest",
+        "mentions": 2,
+        "share": 0.11764705882352941,
+        "sentimentAvg": 0,
+        "mentionsDelta": 2,
+        "sentimentDelta": 0
+      },
+      {
+        "brand": "Ring",
+        "mentions": 1,
+        "share": 0.058823529411764705,
+        "sentimentAvg": 0.25,
+        "mentionsDelta": 1,
+        "sentimentDelta": 0.25
+      },
+      {
+        "brand": "Reolink",
+        "mentions": 1,
+        "share": 0.058823529411764705,
+        "sentimentAvg": 0,
+        "mentionsDelta": 1,
+        "sentimentDelta": 0
+      },
+      {
+        "brand": "Blink",
+        "mentions": 0,
+        "share": 0,
+        "sentimentAvg": 0,
+        "mentionsDelta": 0,
+        "sentimentDelta": 0
+      }
+    ],
+    "insights": [
+      "First day of data: no yesterday baseline yet.",
+      "Top drag: \"Connectivity\" (3).",
+      "Top lift: \"Connectivity\" (1)."
+    ],
+    "alerts": {
+      "negativeSpike": false,
+      "mentionSpike": false,
+      "reasons": []
+    }
+  }
+}

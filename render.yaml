@@ -1,89 +1,35 @@
 services:
   - type: web
-    name: business-class-asia-flight-deal-finder
+    name: wyze-pulse
     runtime: node
-    # NOTE: This app uses SQLite. To keep data between deploys/restarts and to run the daily scanner reliably,
-    # use a paid plan + persistent disk (Render free tier can spin down and does not support disks).
-    plan: starter
+    plan: free
     region: oregon
-    buildCommand: cd apps/web && npm ci --include=dev && npm run db:generate && npm run build
-    startCommand: cd apps/web && node scripts/renderStart.js
+    branch: main
+    autoDeploy: true
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build
+    startCommand: pnpm start -- -p $PORT -H 0.0.0.0
     healthCheckPath: /
     envVars:
       - key: NODE_ENV
         value: production
-      - key: NEXT_TELEMETRY_DISABLED
-        value: "1"
-
-      # SQLite database persisted on the attached disk.
-      - key: DATABASE_URL
-        value: file:/var/data/dev.db
-
-      # Provider: "mock" (no keys) or "amadeus" (requires keys below)
-      - key: FLIGHT_PROVIDER
-        value: mock
-
-      # Daily scan scheduler (runs inside this service process)
-      - key: SCAN_TIMEZONE
+      - key: TIMEZONE
         value: America/Los_Angeles
-      - key: SCAN_CRON
-        value: 0 6 * * *
-      - key: RUN_SCAN_ON_STARTUP
-        value: "true"
+      - key: DATA_CONNECTORS
+        value: sample
 
-      # Passenger group (defaults: 4 adults + 2 children)
-      - key: PASSENGERS_ADULTS
-        value: "4"
-      - key: PASSENGERS_CHILDREN
-        value: "2"
-      - key: PASSENGERS_CHILD_AGES
-        value: 8,10
-
-      # Trip search windows (defaults match the prompt)
-      - key: DEPART_START
-        value: 2026-12-10
-      - key: DEPART_END
-        value: 2026-12-20
-      - key: RETURN_START
-        value: 2027-01-01
-      - key: RETURN_END
-        value: 2027-01-07
-      - key: TRIP_MIN_NIGHTS
-        value: "7"
-      - key: TRIP_MAX_NIGHTS
-        value: "21"
-
-      # Origins/destinations
-      - key: ORIGINS
-        value: SEA,YVR
-      - key: DESTINATIONS_INCLUDE
-        value: ""
-      - key: DESTINATIONS_LIMIT
-        value: "50"
-
-      # Connection rules
-      - key: MAX_STOPS_TOTAL
-        value: "1"
-      - key: OVERNIGHT_MIN_HOURS
-        value: "8"
-
-      # Scanner performance / quota protection
-      - key: SCAN_MAX_COMBOS
-        value: "250"
-      - key: SCAN_MAX_OFFERS_PER_QUERY
-        value: "20"
-      - key: SCAN_CONCURRENCY
-        value: "2"
-
-      # Amadeus Self-Service API (required if FLIGHT_PROVIDER="amadeus")
-      - key: AMADEUS_HOST
-        value: https://test.api.amadeus.com
-      - key: AMADEUS_CLIENT_ID
+      # Optional (only needed if you enable non-sample connectors)
+      - key: OPENAI_API_KEY
         sync: false
-      - key: AMADEUS_CLIENT_SECRET
+      - key: RSS_FEEDS
+        sync: false
+      - key: REDDIT_CLIENT_ID
+        sync: false
+      - key: REDDIT_CLIENT_SECRET
+        sync: false
+      - key: REDDIT_REFRESH_TOKEN
+        sync: false
+      - key: REDDIT_QUERY
+        sync: false
+      - key: REDDIT_SUBREDDITS
         sync: false
 
-    disk:
-      name: flights-data
-      mountPath: /var/data
-      sizeGB: 1

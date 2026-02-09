@@ -1,0 +1,63 @@
+name: Daily Data Refresh
+
+on:
+  schedule:
+    # GitHub Actions cron is evaluated in UTC.
+    # 15:20 UTC is ~07:20 in America/Los_Angeles during standard time.
+    - cron: "20 15 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Refresh Data
+        run: pnpm refresh-data
+        env:
+          TIMEZONE: America/Los_Angeles
+          # Optional configuration via GitHub Variables/Secrets:
+          DATA_CONNECTORS: ${{ vars.DATA_CONNECTORS }}
+          RSS_FEEDS: ${{ vars.RSS_FEEDS }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_REFRESH_TOKEN: ${{ secrets.REDDIT_REFRESH_TOKEN }}
+          REDDIT_QUERY: ${{ vars.REDDIT_QUERY }}
+          REDDIT_SUBREDDITS: ${{ vars.REDDIT_SUBREDDITS }}
+
+      - name: Commit & Push (Only If Data Changed)
+        run: |
+          if git diff --quiet -- public/data; then
+            echo "No changes in public/data; skipping commit."
+            exit 0
+          fi
+
+          git config user.name "wyze-pulse-bot"
+          git config user.email "wyze-pulse-bot@users.noreply.github.com"
+
+          DATE="$(date -u +'%Y-%m-%d')"
+          git add public/data/*.json
+          git commit -m "chore(data): daily refresh ${DATE}"
+          git push
+

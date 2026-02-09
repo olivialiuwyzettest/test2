@@ -1,86 +1,78 @@
-# Wyze Intel Hub
+# Wyze Pulse
 
-External intelligence wallboard for Wyze:
+Daily sentiment + competitive landscape dashboard for Wyze vs competitors.
 
-- Latest mentions related to Wyze (news + public discussions)
-- High-engagement consumer sentiment from public forums (30-day scan)
-- Main competitors (Ring, Blink, Eufy, TP-Link, Reolink, Arlo)
-- Emerging competitors (AI monitoring + smart security players)
-
-Live site: https://wyze-intel-hub.onrender.com/
-
-## Stack
-
-- FastAPI + Jinja templates
-- SQLite (local file)
-- APScheduler (daily refresh job)
-
-## Pages
-
-- `/`: Main Intel Hub (scrollable)
-- `/tv`: 10-foot wallboard (kiosk-safe, no scrolling, auto-rotating pages)
-- `/dashboards/wyze`
-- `/dashboards/sentiment`
-- `/dashboards/competitors`
-- `/dashboards/emerging`
-
-## TV Mode
-
-Open:
-
-- `/tv`
-
-Controls (query params):
-
-- `rotate`: page rotation interval seconds (default from `TV_ROTATION_SECONDS`)
-- `ticker`: ticker rotation seconds (default from `TV_TICKER_SECONDS`)
-- `scale`: manual scale override (example: `/tv?scale=0.9`)
-
-## Theme Tokens
-
-Primary brand color is `#7951D6`.
-
-- Light (default) tokens: `app/static/theme.css`
-- TV (dark) overrides: `app/static/tv.css` scoped to `body.mode-tv`
+- Single page dashboard: `/`
+- Static data files under `public/data/` (committed + refreshed by GitHub Actions)
+- Pluggable connectors (`sample` required; `rss` + `reddit` optional/opt-in)
 
 ## Local Development
 
 ```bash
-cd "<repo-root>"
-.runtime/python/bin/pip3 install -r requirements.txt
-
-# Optional: skip refresh on startup for faster boot
-RUN_REFRESH_ON_STARTUP=false .runtime/python/bin/python3 -m uvicorn app.main:app --reload
+pnpm i
+pnpm dev
 ```
 
-Then open:
+Open: http://localhost:3000
 
-- http://127.0.0.1:8000/
-- http://127.0.0.1:8000/tv
+## Data Refresh
 
-## Refresh / Ingestion
-
-Manual refresh:
+### Sample Data (no keys required)
 
 ```bash
-cd "<repo-root>"
-.runtime/python/bin/python3 scripts/refresh_intel.py
+pnpm refresh-data:sample
 ```
 
-Admin endpoint (if `ADMIN_TOKEN` is set):
+This uses `data/sample_mentions.json` only, with deterministic enrichment (no network).
 
-- `POST /admin/refresh`
+### Real Refresh (OpenAI + optional connectors)
 
-## Render Deployment (API)
-
-This repo includes `scripts/deploy_render.py`, which deploys via Render's API by shipping only `app/` + `requirements.txt`.
+Set `OPENAI_API_KEY`, then:
 
 ```bash
-export RENDER_API_KEY="rnd_..."
-.runtime/python/bin/python3 scripts/deploy_render.py
+pnpm refresh-data
 ```
 
 Notes:
 
-- Free Render services can spin down when idle; the first load after idle can take ~30-60s.
-- Image pulls from Docker Hub can intermittently fail; the deploy script defaults to an MCR-hosted Python image for reliability.
+- `DATA_CONNECTORS` defaults to `sample`.
+- If you enable `rss` or `reddit`, `OPENAI_API_KEY` is required.
+- RSS/Reddit connectors are opt-in and use official/public APIs (no brittle scraping by default).
+
+## Deployment (Vercel)
+
+1. Import the repo in Vercel
+2. Set environment variables (optional for sample-only mode):
+   - `TIMEZONE` (default is `America/Los_Angeles`)
+   - `OPENAI_API_KEY` (required if you enable non-sample connectors)
+   - `DATA_CONNECTORS`, `RSS_FEEDS`, and Reddit credentials as needed
+3. Deploy
+
+The site updates when `public/data/*.json` changes on `main` (or your default branch).
+
+## Deployment (Render)
+
+This repo includes a Render Blueprint at `render.yaml`.
+
+1. Push the repo to GitHub/GitLab/Bitbucket (Render Blueprints are Git-backed)
+2. In Render Dashboard: New +, select "Blueprint"
+3. Point it at your repo and apply
+4. Set any secrets marked `sync: false` (only needed if you enable `rss`/`reddit`)
+
+Note: `render.yaml` defaults to deploying the `main` branch. If you deploy a different branch, update `branch:` in `render.yaml` (or rename your default branch to `main`).
+
+## Daily Refresh (No Server Required)
+
+This repo includes a scheduled GitHub Actions workflow: `.github/workflows/daily-refresh.yml`.
+
+- It runs daily on a cron schedule and on manual dispatch.
+- It runs `pnpm refresh-data`, then commits and pushes changes **only if** `public/data/*.json` changed.
+- The cron schedule is defined in **UTC** (GitHub Actions uses UTC for cron).
+
+This pattern works well with Vercel/Netlify because a commit triggers a redeploy.
+
+## Data + Privacy Notes
+
+- This dashboard is designed to ingest **public** text and source URLs only.
+- Do not store emails, phone numbers, or other private identifiers.
+- External connectors are disabled by default and should be configured to follow source ToS.

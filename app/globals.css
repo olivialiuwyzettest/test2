@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 199 89% 38%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 35%;
+
+    --accent: 46 95% 52%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 199 89% 38%;
+
+    --chart-1: 199 89% 38%;
+    --chart-2: 140 60% 40%;
+    --chart-3: 46 95% 52%;
+    --chart-4: 280 65% 55%;
+    --chart-5: 12 86% 55%;
+
+    --radius: 14px;
+  }
+
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 199 92% 58%;
+    --primary-foreground: 222 47% 8%;
+
+    --secondary: 222 47% 12%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 222 47% 12%;
+    --muted-foreground: 217 20% 74%;
+
+    --accent: 46 95% 52%;
+    --accent-foreground: 222 47% 8%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 20% 18%;
+    --input: 217 20% 18%;
+    --ring: 199 92% 58%;
+
+    --chart-1: 199 92% 58%;
+    --chart-2: 142 58% 52%;
+    --chart-3: 46 95% 52%;
+    --chart-4: 280 70% 62%;
+    --chart-5: 12 90% 60%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer utilities {
+  .bg-atmosphere {
+    background-image:
+      radial-gradient(
+        900px circle at 12% 8%,
+        color-mix(in oklab, hsl(var(--primary)) 18%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        700px circle at 78% 14%,
+        color-mix(in oklab, hsl(var(--accent)) 18%, transparent),
+        transparent 55%
+      ),
+      radial-gradient(
+        1000px circle at 70% 90%,
+        color-mix(in oklab, hsl(var(--chart-4)) 14%, transparent),
+        transparent 58%
+      );
+  }
+}
+

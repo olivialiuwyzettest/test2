@@ -1,0 +1,396 @@
+[
+  {
+    "id": "sample:3416:4744fbf24f95f7e0",
+    "source": "rss",
+    "publishedAt": "2026-02-09T20:09:39.731Z",
+    "url": "https://news.example.com/item/4744fbf24f95f7e0",
+    "author": null,
+    "text": "My Arlo floodlight cam Cam Plus price increase is hard to justify. Overall it's fine, but this part stands out.",
+    "matchedBrand": "Arlo",
+    "matchedCompetitors": [],
+    "rawMeta": {
+      "topicHint": "Subscription / Pricing",
+      "syntheticSentimentHint": -0.6
+    },
+    "sentimentLabel": "negative",
+    "sentimentScore": -0.25,
+    "topics": [
+      "Subscription / Pricing"
+    ],
+    "keyPhrases": [
+      "price increase"
+    ],
+    "confidence": 0.53
+  },
+  {
+    "id": "sample:3410:58e2a1fe1cd2e85a",
+    "source": "news",
+    "publishedAt": "2026-02-09T17:56:04.731Z",
+    "url": "https://www.theverge.com//58e2a1fe1cd2e85a",
+    "author": null,
+    "text": "Ring security cameras: person detection is finally accurate. Analysts note ongoing competition in smart home security.",
+    "matchedBrand": "Ring",
+    "matchedCompetitors": [],
+    "rawMeta": {
+      "topicHint": "AI Detection",
+      "syntheticSentimentHint": 0.55
+    },
+    "sentimentLabel": "neutral",
+    "sentimentScore": 0,
+    "topics": [
+      "AI Detection",
+      "Privacy"
+    ],
+    "keyPhrases": [
+      "person detection"
+    ],
+    "confidence": 0.51
+  },
+  {
+    "id": "sample:3400:e94e25db9722e11e",
+    "source": "reddit",
+    "publishedAt": "2026-02-09T14:54:20.731Z",
+    "url": "https://www.reddit.com/r/homeautomation/comments/e94e25db9722e11e",
+    "author": "doorbell_dad",
+    "text": "Using Ring outdoor cam notifications delayed and the device disconnects. Anyone else seeing this?",
+    "matchedBrand": "Ring",
+    "matchedCompetitors": [],
+    "rawMeta": {
+      "topicHint": "Connectivity",
+      "syntheticSentimentHint": -0.55
+    },
+    "sentimentLabel": "negative",
+    "sentimentScore": -0.25,
+    "topics": [
+      "Connectivity"
+    ],
+    "keyPhrases": [],
+    "confidence": 0.53
+  },
+  {
+    "id": "sample:3402:e2ba1b7b9636ccb2",
+    "source": "reddit",
+    "publishedAt": "2026-02-09T14:53:59.731Z",
+    "url": "https://www.reddit.com/r/homeautomation/comments/e2ba1b7b9636ccb2",
+    "author": "securitybuff",
+    "text": "Wyze outdoor cam live view stuck loading on Wi-Fi. Posting in case it helps someone.",
+    "matchedBrand": "Wyze",
+    "matchedCompetitors": [],
+    "rawMeta": {
+      "topicHint": "Connectivity",
+      "syntheticSentimentHint": -0.75
+    },
+    "sentimentLabel": "neutral",
+    "sentimentScore": 0,
+    "topics": [
+      "General"
+    ],
+    "keyPhrases": [],
+    "confidence": 0.45
+  },
+  {
+    "id": "sample:3413:658e4115780c8c4c",
+    "source": "reddit",
+    "publishedAt": "2026-02-09T12:41:36.731Z",
+    "url": "https://www.reddit.com/r/homeautomation/comments/658e4115780c8c4c",
+    "author": "doorbell_dad",
+    "text": "Switched to Wyze outdoor cam firmware update fixed the audio sync. This is the main pain point right now.",
+    "matchedBrand": "Wyze",
+    "matchedCompetitors": [],
+    "rawMeta": {
+      "topicHint": "App / Firmware",
+      "syntheticSentimentHint": 0.4
+    },
+    "sentimentLabel": "neutral",
+    "sentimentScore": 0,
+    "topics": [
+      "App / Firmware",
+      "AI Detection"
+    ],
+    "keyPhrases": [],
+    "confidence": 0.51
+  },
+  {
+    "id": "sample:3417:9e4e1ba0e5a75da1",
+    "source": "rss",
+    "publishedAt": "2026-02-09T12:07:45.731Z",
+    "url": "https://news.example.com/item/9e4e1ba0e5a75da1",
+    "author": null,
+    "text": "My Wyze doorbell mesh network roaming issue causing dropouts. Posting in case it helps someone.",
+    "matchedBrand": "Wyze",
+    "matchedCompetitors": [],
+    "rawMeta": {
+      "topicHint": "Connectivity",
+      "syntheticSentimentHint": -0.55
+    },
+    "sentimentLabel": "negative",
+    "sentimentScore": -0.25,
+    "topics": [
+      "General"
+    ],
+    "keyPhrases": [],
+    "confidence": 0.53
+  },
+  {
+    "id": "sample:3405:3f11c02f89f2c846",
+    "source": "rss",
+    "publishedAt": "2026-02-09T11:31:24.731Z",
+    "url": "https://news.example.com/item/3f11c02f89f2c846",
+    "author": null,
+    "text": "Using Google Nest cam 2K feed is noticeably sharper. Posting in case it helps someone.",
+    "matchedBrand": "Google Nest",
+    "matchedCompetitors": [],
+    "rawMeta": {
+      "topicHint": "Video Quality",
+      "syntheticSentimentHint": 0.35
+    },
+    "sentimentLabel": "neutral",
+    "sentimentScore": 0,
+    "topics": [
+      "Subscription / Pricing",
+      "Video Quality"
+    ],
+    "keyPhrases": [],
+    "confidence": 0.51
+  },
+  {
+    "id": "sample:3418:d9b96f513bba7a63",
+    "source": "reddit",
+    "publishedAt": "2026-02-09T09:44:21.731Z",
+    "url": "https://www.reddit.com/r/homeautomation/comments/d9b96f513bba7a63",
+    "author": "securitybuff",
+    "text": "Blink floodlight cam app update broke my notifications. Anyone else seeing this?",
+    "matchedBrand": "Blink",
+    "matchedCompetitors": [],
+    "rawMeta": {
+      "topicHint": "App / Firmware",
+      "syntheticSentimentHint": -0.6
+    },
+    "sentimentLabel": "neutral",
+    "sentimentScore": 0,
+    "topics": [
+      "App / Firmware"
+    ],
+    "keyPhrases": [
+      "app update"
+    ],
+    "confidence": 0.45
+  },
+  {
+    "id": "sample:3415:cf67e8c7a5fc172f",
+    "source": "reddit",
+    "publishedAt": "2026-02-09T08:46:16.731Z",
+    "url": "https://www.reddit.com/r/homeautomation/comments/cf67e8c7a5fc172f",
+    "author": "wifi_wrangler",
+    "text": "My Wyze outdoor cam video is blurry and washed out. This is the main pain point right now.",
+    "matchedBrand": "Wyze",
+    "matchedCompetitors": [],
+    "rawMeta": {
+      "topicHint": "Video Quality",
+      "syntheticSentimentHint": -0.5
+    },
+    "sentimentLabel": "neutral",
+    "sentimentScore": 0,
+    "topics": [
+      "AI Detection",
+      "Video Quality"
+    ],
+    "keyPhrases": [],
+    "confidence": 0.51
+  },
+  {
+    "id": "sample:3404:2bd1abb8e2b9954f",
+    "source": "news",
+    "publishedAt": "2026-02-09T08:33:12.731Z",
+    "url": "https://www.theverge.com//2bd1abb8e2b9954f",
+    "author": null,
+    "text": "Google Nest security cameras: charging takes forever. Analysts note ongoing competition in smart home security.",
+    "matchedBrand": "Google Nest",
+    "matchedCompetitors": [],
+    "rawMeta": {
+      "topicHint": "Battery / Power",
+      "syntheticSentimentHint": -0.35
+    },
+    "sentimentLabel": "neutral",
+    "sentimentScore": 0,
+    "topics": [
+      "Battery / Power",
+      "Privacy"
+    ],
+    "keyPhrases": [],
+    "confidence": 0.51
+  },
+  {
+    "id": "sample:3407:bbfae3c3b4f6439e",
+    "source": "reddit",
+    "publishedAt": "2026-02-09T08:15:32.731Z",
+    "url": "https://www.reddit.com/r/homeautomation/comments/bbfae3c3b4f6439e",
+    "author": "wifi_wrangler",
+    "text": "Using Blink indoor cam mesh network roaming issue causing dropouts. This is the main pain point right now.",
+    "matchedBrand": "Blink",
+    "matchedCompetitors": [],
+    "rawMeta": {
+      "topicHint": "Connectivity",
+      "syntheticSentimentHint": -0.4
+    },
+    "sentimentLabel": "negative",
+    "sentimentScore": -0.25,
+    "topics": [
+      "AI Detection"
+    ],
+    "keyPhrases": [],
+    "confidence": 0.53
+  },
+  {
+    "id": "sample:3414:6ae5d9a849461eb5",
+    "source": "reddit",
+    "publishedAt": "2026-02-09T05:55:51.731Z",
+    "url": "https://www.reddit.com/r/homeautomation/comments/6ae5d9a849461eb5",
+    "author": "securitybuff",
+    "text": "Reolink indoor cam vs Eufy, person detection is finally accurate. Overall it's fine, but this part stands out.",
+    "matchedBrand": "Reolink",
+    "matchedCompetitors": [
+      "Eufy"
+    ],
+    "rawMeta": {
+      "topicHint": "AI Detection",
+      "syntheticSentimentHint": 0.55
+    },
+    "sentimentLabel": "neutral",
+    "sentimentScore": 0,
+    "topics": [
+      "AI Detection"
+    ],
+    "keyPhrases": [
+      "person detection"
+    ],
+    "confidence": 0.45
+  },
+  {
+    "id": "sample:3406:bf96463e7b55ae21",
+    "source": "news",
+    "publishedAt": "2026-02-09T04:00:44.731Z",
+    "url": "https://www.theverge.com//bf96463e7b55ae21",
+    "author": null,
+    "text": "Wyze security cameras: live view stuck loading on Wi-Fi. Analysts note ongoing competition in smart home security.",
+    "matchedBrand": "Wyze",
+    "matchedCompetitors": [],
+    "rawMeta": {
+      "topicHint": "Connectivity",
+      "syntheticSentimentHint": -0.75
+    },
+    "sentimentLabel": "neutral",
+    "sentimentScore": 0,
+    "topics": [
+      "Privacy"
+    ],
+    "keyPhrases": [],
+    "confidence": 0.45
+  },
+  {
+    "id": "sample:3403:4047d0e5f26c658a",
+    "source": "rss",
+    "publishedAt": "2026-02-09T02:41:49.731Z",
+    "url": "https://news.example.com/item/4047d0e5f26c658a",
+    "author": null,
+    "text": "Using Reolink floodlight cam another feature moved behind a paywall. Posting in case it helps someone.",
+    "matchedBrand": "Reolink",
+    "matchedCompetitors": [],
+    "rawMeta": {
+      "topicHint": "Subscription / Pricing",
+      "syntheticSentimentHint": -0.65
+    },
+    "sentimentLabel": "negative",
+    "sentimentScore": -0.25,
+    "topics": [
+      "General"
+    ],
+    "keyPhrases": [],
+    "confidence": 0.53
+  },
+  {
+    "id": "sample:3412:8a04d2d17e3c95e1",
+    "source": "reddit",
+    "publishedAt": "2026-02-09T01:14:45.731Z",
+    "url": "https://www.reddit.com/r/homeautomation/comments/8a04d2d17e3c95e1",
+    "author": "doorbell_dad",
+    "text": "Switched to Wyze cam mesh network roaming issue causing dropouts. Anyone else seeing this?",
+    "matchedBrand": "Wyze",
+    "matchedCompetitors": [],
+    "rawMeta": {
+      "topicHint": "Connectivity",
+      "syntheticSentimentHint": -0.55
+    },
+    "sentimentLabel": "negative",
+    "sentimentScore": -0.25,
+    "topics": [
+      "General"
+    ],
+    "keyPhrases": [],
+    "confidence": 0.53
+  },
+  {
+    "id": "sample:3411:894c595fbf237fa7",
+    "source": "rss",
+    "publishedAt": "2026-02-09T01:10:07.731Z",
+    "url": "https://news.example.com/item/894c595fbf237fa7",
+    "author": null,
+    "text": "Switched to Wyze outdoor cam live view stuck loading on Wi-Fi. Posting in case it helps someone.",
+    "matchedBrand": "Wyze",
+    "matchedCompetitors": [],
+    "rawMeta": {
+      "topicHint": "Connectivity",
+      "syntheticSentimentHint": -0.75
+    },
+    "sentimentLabel": "neutral",
+    "sentimentScore": 0,
+    "topics": [
+      "General"
+    ],
+    "keyPhrases": [],
+    "confidence": 0.45
+  },
+  {
+    "id": "sample:3401:5fa5228e70d01e4c",
+    "source": "reddit",
+    "publishedAt": "2026-02-08T23:19:57.731Z",
+    "url": "https://www.reddit.com/r/homeautomation/comments/5fa5228e70d01e4c",
+    "author": "housebot",
+    "text": "Wyze cam notifications delayed and the device disconnects. Posting in case it helps someone.",
+    "matchedBrand": "Wyze",
+    "matchedCompetitors": [],
+    "rawMeta": {
+      "topicHint": "Connectivity",
+      "syntheticSentimentHint": -0.7000000000000001
+    },
+    "sentimentLabel": "negative",
+    "sentimentScore": -0.25,
+    "topics": [
+      "Connectivity"
+    ],
+    "keyPhrases": [],
+    "confidence": 0.53
+  },
+  {
+    "id": "sample:3409:0adb3d75631c6ba5",
+    "source": "reddit",
+    "publishedAt": "2026-02-08T23:05:13.731Z",
+    "url": "https://www.reddit.com/r/homeautomation/comments/0adb3d75631c6ba5",
+    "author": "housebot",
+    "text": "Using Eufy indoor cam support hasn't responded in days. Not sure if it's just my setup.",
+    "matchedBrand": "Eufy",
+    "matchedCompetitors": [],
+    "rawMeta": {
+      "topicHint": "Support",
+      "syntheticSentimentHint": -0.65
+    },
+    "sentimentLabel": "negative",
+    "sentimentScore": -0.25,
+    "topics": [
+      "Support",
+      "Setup"
+    ],
+    "keyPhrases": [],
+    "confidence": 0.5900000000000001
+  }
+]
