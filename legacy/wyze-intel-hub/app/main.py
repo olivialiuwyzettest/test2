@@ -100,6 +100,58 @@ def _display_entity(entity: str) -> str:
     return " ".join(words)
 
 
+# TV "brand marks" used in the Market Watch panel.
+# These are intentionally simple, high-contrast monograms (10-foot UI) and do
+# not rely on third-party logo image hosting.
+_BRAND_MARK_PALETTE: dict[str, tuple[str, str]] = {
+    "wyze": ("#7951D6", "#5B3BA8"),
+    "ring": ("#38BDF8", "#0EA5E9"),
+    "blink": ("#F59E0B", "#D97706"),
+    "eufy": ("#22C55E", "#16A34A"),
+    "tp-link": ("#14B8A6", "#0D9488"),
+    "reolink": ("#EF4444", "#DC2626"),
+    "arlo": ("#A78BFA", "#7C3AED"),
+}
+
+
+def _brand_mark_text(display: str) -> str:
+    display = (display or "").strip()
+    if not display:
+        return "?"
+
+    caps = [ch for ch in display if ch.isalpha() and ch.isupper()]
+    if len(caps) >= 2:
+        return (caps[0] + caps[1]).upper()
+
+    cleaned = "".join(ch for ch in display if ch.isalnum())
+    if not cleaned:
+        return "?"
+    return cleaned[:2].upper()
+
+
+def _brand_mark(entity: str) -> dict[str, str]:
+    key = (entity or "").strip().lower()
+    display = _display_entity(entity)
+
+    if key in _BRAND_MARK_PALETTE:
+        bg1, bg2 = _BRAND_MARK_PALETTE[key]
+    else:
+        # Deterministic HSL fallback for emerging/unknown brands.
+        # Keep it vibrant but still readable on the dark TV background.
+        h = 0
+        for ch in key:
+            h = (h * 31 + ord(ch)) % 360
+        bg1 = f"hsl({h} 72% 52%)"
+        bg2 = f"hsl({(h + 18) % 360} 72% 38%)"
+
+    return {
+        "text": _brand_mark_text(display),
+        "bg1": bg1,
+        "bg2": bg2,
+        "title": display,
+    }
+
+
 def _delta_badge(current: int, previous: int) -> dict:
     delta = int(current) - int(previous)
     if delta > 0:
@@ -256,6 +308,7 @@ def _build_tv_context(request: Request, db: Session, settings: Settings) -> dict
             c = int(curr.get(ent, 0))
             p = int(prev.get(ent, 0))
             badge = _delta_badge(c, p)
+            mark = _brand_mark(ent)
             rows.append(
                 {
                     "entity": ent,
@@ -265,6 +318,10 @@ def _build_tv_context(request: Request, db: Session, settings: Settings) -> dict
                     "delta": badge["delta"],
                     "delta_text": badge["text"],
                     "delta_class": badge["class"],
+                    "mark_text": mark["text"],
+                    "mark_bg1": mark["bg1"],
+                    "mark_bg2": mark["bg2"],
+                    "mark_title": mark["title"],
                 }
             )
         rows.sort(key=lambda r: (r["delta"], r["current"]), reverse=True)

@@ -156,7 +156,9 @@
                     {% for row in tv_competitor_spikes[:4] %}
                     <div class="tv-row" role="listitem">
                       <div class="tv-row-left">
-                        <div class="tv-row-title">{{ row.entity_display }}</div>
+                        <div class="tv-row-brand" title="{{ row.mark_title }}">
+                          <span class="tv-brandmark" style="--bm1: {{ row.mark_bg1 }}; --bm2: {{ row.mark_bg2 }};">{{ row.mark_text }}</span>
+                        </div>
                         <div class="tv-row-sub">{{ row.current }} mentions (24h)</div>
                       </div>
                       <div class="tv-row-right">
@@ -179,7 +181,9 @@
                     {% for row in tv_emerging_spikes[:4] %}
                     <div class="tv-row" role="listitem">
                       <div class="tv-row-left">
-                        <div class="tv-row-title">{{ row.entity_display }}</div>
+                        <div class="tv-row-brand" title="{{ row.mark_title }}">
+                          <span class="tv-brandmark" style="--bm1: {{ row.mark_bg1 }}; --bm2: {{ row.mark_bg2 }};">{{ row.mark_text }}</span>
+                        </div>
                         <div class="tv-row-sub">{{ row.current }} mentions (24h)</div>
                       </div>
                       <div class="tv-row-right">
