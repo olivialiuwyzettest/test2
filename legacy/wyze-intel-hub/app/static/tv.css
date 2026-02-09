@@ -523,6 +523,8 @@ body.mode-tv {
   background: linear-gradient(180deg, var(--bm1), var(--bm2));
   border: 1px solid rgba(255, 255, 255, 0.16);
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25);
+  position: relative;
+  overflow: hidden;
   display: grid;
   place-items: center;
   color: rgba(255, 255, 255, 0.96);
@@ -531,6 +533,22 @@ body.mode-tv {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   flex: none;
+}
+
+.tv-brandmark-img {
+  position: absolute;
+  inset: 9px;
+  width: calc(100% - 18px);
+  height: calc(100% - 18px);
+  object-fit: contain;
+  z-index: 1;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+  pointer-events: none;
+}
+
+.tv-brandmark-text {
+  position: relative;
+  z-index: 0;
 }
 
 .tv-row .tv-row-title {

@@ -113,6 +113,41 @@ _BRAND_MARK_PALETTE: dict[str, tuple[str, str]] = {
     "arlo": ("#A78BFA", "#7C3AED"),
 }
 
+_BRAND_LOGO_DOMAINS: dict[str, str] = {
+    # Main competitors
+    "ring": "ring.com",
+    "blink": "blinkforhome.com",
+    "eufy": "eufy.com",
+    "tp-link": "tp-link.com",
+    "reolink": "reolink.com",
+    "arlo": "arlo.com",
+    # Emerging set (best-effort)
+    "aqara": "aqara.com",
+    "simplisafe": "simplisafe.com",
+    "lorex": "lorex.com",
+    "google nest": "nest.com",
+    "xiaomi": "xiaomi.com",
+    "hikvision": "hikvision.com",
+    "dahua": "dahuasecurity.com",
+    "unifi protect": "ui.com",
+    "tapo": "tapo.com",
+    "swann": "swann.com",
+    "annke": "annke.com",
+    "yi home": "yitechnology.com",
+    "ecobee": "ecobee.com",
+    "abode": "goabode.com",
+    "canary": "canary.is",
+    "deep sentinel": "deepsentinel.com",
+}
+
+
+def _brand_logo_url(entity: str) -> str:
+    key = (entity or "").strip().lower()
+    domain = _BRAND_LOGO_DOMAINS.get(key, "")
+    if not domain:
+        return ""
+    return f"https://www.google.com/s2/favicons?domain={domain}&sz=128"
+
 
 def _brand_mark_text(display: str) -> str:
     display = (display or "").strip()
@@ -318,6 +353,7 @@ def _build_tv_context(request: Request, db: Session, settings: Settings) -> dict
                     "delta": badge["delta"],
                     "delta_text": badge["text"],
                     "delta_class": badge["class"],
+                    "logo_url": _brand_logo_url(ent),
                     "mark_text": mark["text"],
                     "mark_bg1": mark["bg1"],
                     "mark_bg2": mark["bg2"],

@@ -157,7 +157,19 @@
                     <div class="tv-row" role="listitem">
                       <div class="tv-row-left">
                         <div class="tv-row-brand" title="{{ row.mark_title }}">
-                          <span class="tv-brandmark" style="--bm1: {{ row.mark_bg1 }}; --bm2: {{ row.mark_bg2 }};">{{ row.mark_text }}</span>
+                          <span class="tv-brandmark" style="--bm1: {{ row.mark_bg1 }}; --bm2: {{ row.mark_bg2 }};">
+                            {% if row.logo_url %}
+                            <img
+                              class="tv-brandmark-img"
+                              src="{{ row.logo_url }}"
+                              alt=""
+                              loading="lazy"
+                              referrerpolicy="no-referrer"
+                              onerror="this.remove();"
+                            />
+                            {% endif %}
+                            <span class="tv-brandmark-text">{{ row.mark_text }}</span>
+                          </span>
                         </div>
                         <div class="tv-row-sub">{{ row.current }} mentions (24h)</div>
                       </div>
@@ -182,7 +194,19 @@
                     <div class="tv-row" role="listitem">
                       <div class="tv-row-left">
                         <div class="tv-row-brand" title="{{ row.mark_title }}">
-                          <span class="tv-brandmark" style="--bm1: {{ row.mark_bg1 }}; --bm2: {{ row.mark_bg2 }};">{{ row.mark_text }}</span>
+                          <span class="tv-brandmark" style="--bm1: {{ row.mark_bg1 }}; --bm2: {{ row.mark_bg2 }};">
+                            {% if row.logo_url %}
+                            <img
+                              class="tv-brandmark-img"
+                              src="{{ row.logo_url }}"
+                              alt=""
+                              loading="lazy"
+                              referrerpolicy="no-referrer"
+                              onerror="this.remove();"
+                            />
+                            {% endif %}
+                            <span class="tv-brandmark-text">{{ row.mark_text }}</span>
+                          </span>
                         </div>
                         <div class="tv-row-sub">{{ row.current }} mentions (24h)</div>
                       </div>
