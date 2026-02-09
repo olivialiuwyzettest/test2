@@ -7,6 +7,11 @@
     return document.querySelector(selector);
   }
 
+  function isFiniteNumber(n) {
+    // Avoid Number.isFinite for older embedded/TV browsers.
+    return typeof n === "number" && isFinite(n);
+  }
+
   function cssVar(name, fallback) {
     try {
       var value = window
@@ -21,7 +26,7 @@
 
   function clampInt(value, min, max, fallback) {
     var n = Number(value);
-    if (!Number.isFinite(n)) return fallback;
+    if (!isFiniteNumber(n)) return fallback;
     n = Math.floor(n);
     if (n < min) return min;
     if (n > max) return max;
@@ -40,19 +45,30 @@
   function throttle(fn, ms) {
     var last = 0;
     var queued = false;
+    var queuedArgs = null;
+    var queuedThis = null;
     return function () {
       var now = Date.now();
+      var args = arguments;
+      var ctx = this;
       if (now - last >= ms) {
         last = now;
-        fn();
+        fn.apply(ctx, args);
         return;
       }
       if (queued) return;
       queued = true;
+      queuedArgs = args;
+      queuedThis = ctx;
       window.setTimeout(function () {
         queued = false;
         last = Date.now();
-        fn();
+        try {
+          fn.apply(queuedThis, queuedArgs || []);
+        } finally {
+          queuedArgs = null;
+          queuedThis = null;
+        }
       }, ms);
     };
   }
@@ -80,10 +96,10 @@
       BASE_H;
     var scale = Math.min(w / BASE_W, h / BASE_H) * SCALE_PAD;
 
-    if (Number.isFinite(override) && override > 0.3 && override < 3) {
+    if (isFiniteNumber(override) && override > 0.3 && override < 3) {
       scale = override;
     }
-    if (!Number.isFinite(scale) || scale <= 0) {
+    if (!isFiniteNumber(scale) || scale <= 0) {
       scale = 1;
     }
     scale = Math.max(0.25, Math.min(scale, 3));
@@ -91,7 +107,7 @@
   }
 
   updateScale();
-  window.addEventListener("resize", throttle(updateScale, 200), { passive: true });
+  window.addEventListener("resize", throttle(updateScale, 200));
 
   // Kiosk-safe: never navigate away in the same tab.
   document.addEventListener(
@@ -128,8 +144,17 @@
   var feedIndicatorEl = qs("[data-tv-feed-indicator]");
   var pausedUntil = 0;
   var pauseMs = 60 * 1000;
+  var pauseEnabled = true;
+
+  // Allow disabling the pause-on-interaction behavior for kiosks/TV browsers that
+  // emit frequent synthetic pointer events.
+  var pauseParam = String(getQueryParam("pause") || "").trim().toLowerCase();
+  if (pauseParam === "0" || pauseParam === "off" || pauseParam === "false" || pauseParam === "no") {
+    pauseEnabled = false;
+  }
 
   function isPaused() {
+    if (!pauseEnabled) return false;
     return Date.now() < pausedUntil;
   }
 
@@ -159,7 +184,7 @@
     var qp = (getQueryParam("page") || "").trim().toLowerCase();
     if (qp) {
       var asNum = Number(qp);
-      if (Number.isFinite(asNum)) {
+      if (isFiniteNumber(asNum)) {
         return clampInt(asNum, 1, pages.length, 1) - 1;
       }
       for (var i = 0; i < pages.length; i += 1) {
@@ -170,7 +195,7 @@
 
     try {
       var stored = Number(window.localStorage.getItem("wyzeIntelTvPageIndex") || "");
-      if (Number.isFinite(stored)) return clampInt(stored, 0, pages.length - 1, 0);
+      if (isFiniteNumber(stored)) return clampInt(stored, 0, pages.length - 1, 0);
     } catch (e) {}
     return 0;
   }
@@ -193,11 +218,28 @@
     pausedUntil = Date.now() + pauseMs;
   }
 
-  var onMove = throttle(onInteract, 250);
-  window.addEventListener("mousemove", onMove, { passive: true });
-  window.addEventListener("keydown", onInteract);
-  window.addEventListener("touchstart", onInteract, { passive: true });
-  window.addEventListener("pointerdown", onInteract, { passive: true });
+  if (pauseEnabled) {
+    var lastMoveX = null;
+    var lastMoveY = null;
+    function onMouseMove(e) {
+      // Ignore tiny jitter so rotation doesn't get stuck on some devices.
+      var x = e && typeof e.clientX === "number" ? e.clientX : null;
+      var y = e && typeof e.clientY === "number" ? e.clientY : null;
+      if (x !== null && y !== null && lastMoveX !== null && lastMoveY !== null) {
+        var dist = Math.abs(x - lastMoveX) + Math.abs(y - lastMoveY);
+        if (dist < 8) return;
+      }
+      lastMoveX = x;
+      lastMoveY = y;
+      onInteract();
+    }
+
+    var onMove = throttle(onMouseMove, 250);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("keydown", onInteract);
+    window.addEventListener("touchstart", onInteract);
+    window.addEventListener("pointerdown", onInteract);
+  }
 
   // Rolling feed ticker (latest news + discussions).
   var feedItems = qsa("[data-tv-feed-item]");
@@ -340,9 +382,7 @@
 
   if (sparkCanvases.length > 0) {
     drawAllSparks();
-    window.addEventListener("resize", throttle(drawAllSparks, 250), {
-      passive: true
-    });
+    window.addEventListener("resize", throttle(drawAllSparks, 250));
   }
 
   // Burn-in prevention: subtle layout shift every few minutes.
