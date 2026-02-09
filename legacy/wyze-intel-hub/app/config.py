@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     stale_after_hours: int = 48
 
     tv_rotation_seconds: int = 20
-    tv_ticker_seconds: int = 7
+    tv_ticker_seconds: int = 30
     tv_burnin_shift_seconds: int = 240
     tv_reload_seconds: int = 600
 
