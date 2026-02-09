@@ -6,13 +6,11 @@ services:
     region: oregon
     branch: main
     autoDeploy: true
-    buildCommand: corepack enable && corepack prepare pnpm@10.29.2 --activate && pnpm install --frozen-lockfile && pnpm build
+    buildCommand: corepack enable && corepack prepare pnpm@10.29.2 --activate && pnpm install --frozen-lockfile --prod=false && pnpm build
     # Use npm for runtime start (always available), even though we build/install with pnpm.
-    startCommand: npm run start -- -p $PORT -H 0.0.0.0
+    startCommand: NODE_ENV=production npm run start -- -p $PORT -H 0.0.0.0
     healthCheckPath: /
     envVars:
-      - key: NODE_ENV
-        value: production
       - key: TIMEZONE
         value: America/Los_Angeles
       - key: DATA_CONNECTORS
