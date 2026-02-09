@@ -58,6 +58,8 @@ body.mode-tv {
 .tv-root {
   width: 1920px;
   height: 1080px;
+  /* Keep the 1920x1080 design baseline; JS scaling handles smaller/larger screens. */
+  flex: none;
   padding: clamp(22px, 2.2vh, 36px);
   display: grid;
   grid-template-rows: auto auto auto 1fr;
@@ -538,18 +540,4 @@ body.mode-tv {
 .tv-metric-label {
   color: var(--muted);
   font-size: clamp(24px, 1.1vw, 28px);
-}
-
-@media (max-width: 1400px) {
-  .tv-kpis {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .tv-page {
-    grid-template-columns: 1fr;
-  }
-
-  .tv-summary ul {
-    grid-template-columns: 1fr;
-  }
 }

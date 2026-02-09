@@ -67,8 +67,17 @@
 
   function updateScale() {
     var override = Number(getQueryParam("scale") || "");
-    var w = window.innerWidth || BASE_W;
-    var h = window.innerHeight || BASE_H;
+    var vv = window.visualViewport;
+    var w =
+      (vv && vv.width) ||
+      document.documentElement.clientWidth ||
+      window.innerWidth ||
+      BASE_W;
+    var h =
+      (vv && vv.height) ||
+      document.documentElement.clientHeight ||
+      window.innerHeight ||
+      BASE_H;
     var scale = Math.min(w / BASE_W, h / BASE_H) * SCALE_PAD;
 
     if (Number.isFinite(override) && override > 0.3 && override < 3) {
@@ -77,7 +86,7 @@
     if (!Number.isFinite(scale) || scale <= 0) {
       scale = 1;
     }
-    scale = Math.max(0.5, Math.min(scale, 3));
+    scale = Math.max(0.25, Math.min(scale, 3));
     document.documentElement.style.setProperty("--tv-scale", scale.toFixed(4));
   }
 

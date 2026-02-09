@@ -10,6 +10,7 @@ Optional env vars:
 - RENDER_SERVICE_NAME (default: wyze-intel-hub)
 - RENDER_REGION (default: oregon)
 - RENDER_PLAN (default: free)
+- RENDER_IMAGE_PATH (default: mcr.microsoft.com/devcontainers/python:3.11)
 - RENDER_HEALTH_PATH (default: /healthz)
 - RENDER_POLL_SECONDS (default: 10)
 - RENDER_DEPLOY_TIMEOUT_SECONDS (default: 1800)
@@ -29,6 +30,9 @@ from typing import Any
 import requests
 
 RENDER_API_BASE = "https://api.render.com/v1"
+# Note: Docker Hub pulls can intermittently fail due to upstream rate-limits/outages.
+# MCR tends to be more reliable for anonymous pulls from Render.
+DEFAULT_IMAGE_PATH = "mcr.microsoft.com/devcontainers/python:3.11"
 
 EXCLUDE_DIRS = {
     ".git",
@@ -143,6 +147,15 @@ class RenderClient:
     def trigger_deploy(self, service_id: str) -> dict:
         return self._request("POST", f"/services/{service_id}/deploys", payload={})
 
+    def list_deploys(self, service_id: str, *, limit: int = 20) -> list[dict]:
+        rows = self._request("GET", f"/services/{service_id}/deploys", params={"limit": str(limit)})
+        deploys: list[dict] = []
+        for row in rows or []:
+            deploy = (row or {}).get("deploy") or {}
+            if deploy:
+                deploys.append(deploy)
+        return deploys
+
     def get_deploy(self, service_id: str, deploy_id: str) -> dict:
         return self._request("GET", f"/services/{service_id}/deploys/{deploy_id}")
 
@@ -219,7 +232,15 @@ def _base_env_vars(archive_b64: str) -> list[dict[str, str]]:
     ]
 
 
-def _service_payload(owner_id: str, service_name: str, archive_b64: str, plan: str, region: str, health_path: str) -> dict:
+def _service_payload(
+    owner_id: str,
+    service_name: str,
+    archive_b64: str,
+    plan: str,
+    region: str,
+    health_path: str,
+    image_path: str,
+) -> dict:
     bootstrap_command = _build_bootstrap_command()
     return {
         "type": "web_service",
@@ -228,7 +249,7 @@ def _service_payload(owner_id: str, service_name: str, archive_b64: str, plan: s
         "autoDeploy": "no",
         "image": {
             "ownerId": owner_id,
-            "imagePath": "docker.io/library/python:3.11-slim",
+            "imagePath": image_path,
         },
         "envVars": _base_env_vars(archive_b64),
         "serviceDetails": {
@@ -279,6 +300,7 @@ def main() -> None:
     region = os.getenv("RENDER_REGION", "oregon").strip() or "oregon"
     plan = os.getenv("RENDER_PLAN", "free").strip() or "free"
     health_path = os.getenv("RENDER_HEALTH_PATH", "/healthz").strip() or "/healthz"
+    image_path = os.getenv("RENDER_IMAGE_PATH", DEFAULT_IMAGE_PATH).strip() or DEFAULT_IMAGE_PATH
     poll_seconds = int(os.getenv("RENDER_POLL_SECONDS", "10"))
     timeout_seconds = int(os.getenv("RENDER_DEPLOY_TIMEOUT_SECONDS", "1800"))
 
@@ -292,7 +314,7 @@ def main() -> None:
     archive_b64 = base64.b64encode(archive_bytes).decode("ascii")
     print(f"Archive payload size (base64): {len(archive_b64)} chars")
 
-    payload = _service_payload(owner_id, service_name, archive_b64, plan, region, health_path)
+    payload = _service_payload(owner_id, service_name, archive_b64, plan, region, health_path, image_path)
 
     existing = client.list_services(owner_id=owner_id, name=service_name)
     if existing:
@@ -303,6 +325,11 @@ def main() -> None:
         for env_var in _base_env_vars(archive_b64):
             client.upsert_env_var(service_id, env_var["key"], env_var["value"])
 
+        # Render's deploy trigger endpoint sometimes returns 202 with an empty body.
+        # Capture the current latest deploy ID so we can detect the newly triggered deploy.
+        prior_deploys = client.list_deploys(service_id, limit=1)
+        prior_deploy_id = str(prior_deploys[0]["id"]) if prior_deploys else ""
+
         client.update_service(
             service_id,
             {
@@ -312,8 +339,21 @@ def main() -> None:
                 "name": service_name,
             },
         )
-        deploy = client.trigger_deploy(service_id)
+
+        deploy = client.trigger_deploy(service_id) or {}
         deploy_id = str(deploy.get("id") or "")
+
+        if not deploy_id:
+            # Poll until a new deploy appears (or time out).
+            deadline = time.time() + 30
+            while time.time() < deadline:
+                latest = client.list_deploys(service_id, limit=1)
+                if latest:
+                    candidate = str(latest[0].get("id") or "")
+                    if candidate and candidate != prior_deploy_id:
+                        deploy_id = candidate
+                        break
+                time.sleep(1)
     else:
         print(f"Creating new service: {service_name}")
         created = client.create_service(payload)
