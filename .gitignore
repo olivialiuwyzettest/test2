@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+.env
+.venv/
+intel.db
+*.log
+.DS_Store
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+coverage/
+
+# Local runtimes
+.runtime/
+
+# Generated artifacts
+output/
+tmp/

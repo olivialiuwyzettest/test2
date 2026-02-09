@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card" style="margin-bottom: 1rem;">
+  <h2>Emerging Competitor Watch</h2>
+  <div class="meta">
+    Detects non-core competitors showing up in smart camera, security, and AI monitoring discussions.
+    {% if last_refresh and last_refresh.completed_at %}
+    Last refresh: {{ last_refresh.completed_at.strftime('%Y-%m-%d %H:%M UTC') }}
+    {% endif %}
+  </div>
+</section>
+
+<section class="grid columns-2" style="margin-bottom: 1rem;">
+  <article class="card table-wrap">
+    <h3>Emerging Entity Leaderboard (14d)</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Entity</th>
+          <th>Mentions</th>
+          <th>Max Relevance</th>
+          <th>Last Seen</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rollup %}
+        <tr>
+          <td><span class="tag">{{ row.entity }}</span></td>
+          <td>{{ row.mentions }}</td>
+          <td>{{ '%.2f'|format(row.max_relevance) }}</td>
+          <td>{{ row.last_seen.strftime('%Y-%m-%d %H:%M') if row.last_seen else '-' }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4">No emerging entities detected yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </article>
+
+  <article class="card">
+    <h3>Detection Logic</h3>
+    <p class="small-note">
+      Items are pulled from market-wide camera/security + AI monitoring signals, then filtered for candidate brands outside the core competitor list.
+    </p>
+    <p class="small-note">
+      Relevance scoring favors newest items and discussion engagement. Older/low-signal data is de-prioritized.
+    </p>
+  </article>
+</section>
+
+<section class="card table-wrap">
+  <h3>Latest Emerging Signals</h3>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Published</th>
+        <th>Entity</th>
+        <th>Source</th>
+        <th>Title</th>
+        <th>Engagement</th>
+        <th>Relevance</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>{{ item.published_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td><span class="tag">{{ item.entity }}</span></td>
+        <td>{{ item.source_name }}</td>
+        <td><a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.title }}</a></td>
+        <td>{{ item.engagement_score }}</td>
+        <td>{{ '%.2f'|format(item.relevance_score) }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6">No data yet.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

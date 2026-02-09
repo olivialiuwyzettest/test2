@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ page_title }} | Wyze Intel Hub</title>
+    <link rel="stylesheet" href="/static/theme.css" />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body data-refresh-seconds="300">
+    <header class="topbar">
+      <div class="brand">
+        <h1>Wyze External Intelligence Hub</h1>
+        <span>Daily auto-refresh with latest high-signal sources</span>
+      </div>
+      <div class="nav" role="navigation" aria-label="Primary">
+        <a href="/" class="{% if request.url.path == '/' %}active{% endif %}">Main Hub</a>
+        <a href="/dashboards/wyze" class="{% if request.url.path == '/dashboards/wyze' %}active{% endif %}">Wyze Uses</a>
+        <a href="/dashboards/sentiment" class="{% if request.url.path == '/dashboards/sentiment' %}active{% endif %}">Sentiment</a>
+        <a href="/dashboards/competitors" class="{% if request.url.path == '/dashboards/competitors' %}active{% endif %}">Main Competitors</a>
+        <a href="/dashboards/emerging" class="{% if request.url.path == '/dashboards/emerging' %}active{% endif %}">Emerging Competitors</a>
+        <a href="/tv">TV Mode</a>
+      </div>
+    </header>
+    <main class="page">
+      {% block content %}{% endblock %}
+    </main>
+    <script src="/static/dashboard.js"></script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

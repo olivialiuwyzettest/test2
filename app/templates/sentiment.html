@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card" style="margin-bottom: 1rem;">
+  <h2>Consumer Sentiment Dashboard (Wyze)</h2>
+  <div class="meta">
+    Source: public Reddit discussions filtered for high engagement (upvotes/comments).
+    {% if last_refresh and last_refresh.completed_at %}
+    Last refresh: {{ last_refresh.completed_at.strftime('%Y-%m-%d %H:%M UTC') }}
+    {% endif %}
+  </div>
+</section>
+
+<section class="grid columns-2" style="margin-bottom: 1rem;">
+  <article class="card chart-area">
+    <h3>{{ window_days }}-Day Sentiment Trend</h3>
+    <canvas id="sentimentChart" width="900" height="280"></canvas>
+    <div class="small-note">Scale: -1.0 (negative) to +1.0 (positive)</div>
+  </article>
+  <article class="card">
+    <h3>Signal Mix</h3>
+    <div class="kpi"><strong>{{ total_items_count }}</strong><span class="meta">High-engagement posts (last {{ window_days }} days)</span></div>
+    <p class="sentiment positive">Positive: {{ positive_count }}</p>
+    <p class="sentiment negative">Negative: {{ negative_count }}</p>
+    <p class="sentiment neutral">Neutral: {{ neutral_count }}</p>
+    <div class="small-note">Table shows latest {{ items|length }} posts.</div>
+  </article>
+</section>
+
+<section class="grid columns-2" style="margin-bottom: 1rem;">
+  <article class="card">
+    <h3>Top Positive Discussions</h3>
+    <div class="list">
+      {% for item in top_positive %}
+      <div class="list-item">
+        <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.title }}</a>
+        <div class="meta">{{ item.source_name }} | engagement {{ item.engagement_score }}</div>
+        <div class="sentiment positive">{{ '%.2f'|format(item.sentiment_score) }}</div>
+      </div>
+      {% else %}
+      <div class="small-note">No data yet.</div>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article class="card">
+    <h3>Top Negative Discussions</h3>
+    <div class="list">
+      {% for item in top_negative %}
+      <div class="list-item">
+        <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.title }}</a>
+        <div class="meta">{{ item.source_name }} | engagement {{ item.engagement_score }}</div>
+        <div class="sentiment negative">{{ '%.2f'|format(item.sentiment_score) }}</div>
+      </div>
+      {% else %}
+      <div class="small-note">No data yet.</div>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+
+<section class="card table-wrap">
+  <h3>Latest High-Engagement Forum Posts</h3>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Published</th>
+        <th>Source</th>
+        <th>Title</th>
+        <th>Engagement</th>
+        <th>Sentiment</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>{{ item.published_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td>{{ item.source_name }}</td>
+        <td><a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.title }}</a></td>
+        <td>{{ item.engagement_score }}</td>
+        <td class="sentiment {{ 'positive' if item.sentiment_score >= 0.2 else 'negative' if item.sentiment_score <= -0.2 else 'neutral' }}">{{ '%.2f'|format(item.sentiment_score) }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="5">No data yet.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.wyzeIntel.drawSentimentChart("sentimentChart", {{ timeseries|tojson }});
+</script>
+{% endblock %}

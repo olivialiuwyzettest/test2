@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TV Mode | Wyze Intel Hub</title>
+    <link rel="stylesheet" href="/static/theme.css" />
+    <link rel="stylesheet" href="/static/tv.css" />
+  </head>
+  <body
+    class="mode-tv"
+    data-refresh-seconds="{{ tv.reload_seconds }}"
+    data-tv-rotation-seconds="{{ tv.rotation_seconds }}"
+    data-tv-ticker-seconds="{{ tv.ticker_seconds }}"
+    data-tv-burnin-shift-seconds="{{ tv.burnin_shift_seconds }}"
+  >
+    <div class="tv-fit">
+      <div class="tv-root">
+        <header class="tv-header">
+          <div class="tv-brand">
+            <h1 class="tv-title">Wyze Intel Hub</h1>
+            <div class="tv-subtitle">External intelligence wallboard (auto-updated daily)</div>
+          </div>
+
+          <div class="tv-status">
+            <span class="tv-chip {{ header.pipeline_class }}"><strong>{{ header.pipeline_label }}</strong></span>
+            <span class="tv-chip is-accent"><span data-tv-page-name>Main</span>&nbsp;<span data-tv-indicator>Page 1/4</span></span>
+            <span class="tv-chip"
+              ><strong>Last refresh</strong>&nbsp;{{ header.last_refresh_pt }}{% if header.last_refresh_ago %}&nbsp;({{ header.last_refresh_ago }}){% endif %}</span
+            >
+            <span class="tv-chip"><strong>Now</strong>&nbsp;<span data-tv-clock></span></span>
+          </div>
+        </header>
+
+        <section class="tv-kpis" aria-label="Key metrics (last 24 hours)">
+          {% for k in kpis %}
+          <article class="tv-kpi">
+            <div class="tv-kpi-label">
+              <span>{{ k.label }}</span>
+              {% if k.delta %}
+              <span class="tv-delta {{ k.delta.class }}">{{ k.delta.text }}</span>
+              {% endif %}
+            </div>
+            <p class="tv-kpi-value">{{ k.value }}</p>
+            <canvas class="tv-spark" data-tv-spark="{{ k.key }}" width="640" height="96"></canvas>
+            <div class="tv-kpi-note">{{ k.note }}</div>
+          </article>
+          {% endfor %}
+        </section>
+
+        <section class="tv-ticker" aria-label="Latest rolling feed">
+          <div class="tv-ticker-left">
+            <span class="tv-chip is-accent"><strong>Latest feed</strong></span>
+            <span class="tv-chip"><strong data-tv-feed-indicator>1/1</strong></span>
+          </div>
+          <div class="tv-ticker-stage">
+            {% for item in ticker_items %}
+            <div class="tv-ticker-item {% if loop.index0 == 0 %}is-active{% endif %}" data-tv-feed-item>
+              <span class="tv-pill is-accent">{{ item.topic_label }}</span>
+              {% if item.entity_display %}
+              <span class="tv-pill">{{ item.entity_display }}</span>
+              {% endif %}
+              <span class="tv-ticker-text">{{ item.title }}</span>
+              <span class="tv-ticker-meta">{{ item.source_name }} · {{ item.age }}</span>
+            </div>
+            {% else %}
+            <div class="tv-ticker-item is-active" data-tv-feed-item>
+              <span class="tv-ticker-text">No recent items yet.</span>
+            </div>
+            {% endfor %}
+          </div>
+        </section>
+
+        <div class="tv-stage {% if banner %}has-banner{% endif %}" aria-label="Rotating dashboards">
+          {% if banner %}
+          <div class="tv-banner tv-banner-overlay {{ banner.class }}">
+            <div><strong>{{ banner.headline }}</strong>&nbsp;{{ banner.details }}</div>
+            <div class="tv-chip {{ banner.badge_class }}"><strong>{{ banner.badge_text }}</strong></div>
+          </div>
+          {% endif %}
+
+          <section class="tv-page is-active" data-page-key="main" data-page-title="Main">
+            <article class="tv-panel">
+              <div class="tv-panel-head">
+                <div>
+                  <h2 class="tv-panel-title">Wyze: Top Signals</h2>
+                  <div class="tv-panel-sub">Most recent + most relevant</div>
+                </div>
+                {% if qrs.wyze %}
+                <img class="tv-qr" src="{{ qrs.wyze }}" alt="QR code: Wyze details" />
+                {% endif %}
+              </div>
+              <div class="tv-list" role="list">
+                {% for item in tv_wyze_signals %}
+                <div class="tv-item" role="listitem">
+                  <div class="tv-item-title">{{ item.title }}</div>
+                  <div class="tv-item-meta">
+                    <span class="tv-pill">{{ item.source_name }}</span>
+                    <span class="tv-pill">{{ item.age }}</span>
+                    {% if item.engagement_score %}
+                    <span class="tv-pill">eng {{ item.engagement_score }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+                {% else %}
+                <div class="tv-item">
+                  <div class="tv-item-title">No Wyze items yet.</div>
+                </div>
+                {% endfor %}
+              </div>
+            </article>
+
+            <article class="tv-panel">
+              <div class="tv-panel-head">
+                <div>
+                  <h2 class="tv-panel-title">Sentiment: Top Negative</h2>
+                  <div class="tv-panel-sub">High-engagement public forums (30d scan)</div>
+                </div>
+                {% if qrs.sentiment %}
+                <img class="tv-qr" src="{{ qrs.sentiment }}" alt="QR code: Sentiment details" />
+                {% endif %}
+              </div>
+              <div class="tv-list" role="list">
+                {% for item in tv_sentiment_negative %}
+                <div class="tv-item" role="listitem">
+                  <div class="tv-item-title">{{ item.title }}</div>
+                  <div class="tv-item-meta">
+                    <span class="tv-pill">{{ item.source_name }}</span>
+                    <span class="tv-pill">{{ item.age }}</span>
+                    <span class="tv-pill is-negative">eng {{ item.engagement_score }}</span>
+                  </div>
+                </div>
+                {% else %}
+                <div class="tv-item">
+                  <div class="tv-item-title">No negative posts detected in the current window.</div>
+                </div>
+                {% endfor %}
+              </div>
+            </article>
+
+            <article class="tv-panel">
+              <div class="tv-panel-head">
+                <div>
+                  <h2 class="tv-panel-title">Market Watch</h2>
+                  <div class="tv-panel-sub">24h spikes vs prior 24h</div>
+                </div>
+                {% if qrs.competitors %}
+                <img class="tv-qr" src="{{ qrs.competitors }}" alt="QR code: Competitor details" />
+                {% endif %}
+              </div>
+
+              <div class="tv-split">
+                <div>
+                  <div class="tv-panel-sub" style="margin-bottom: 10px;">Main competitors</div>
+                  <div class="tv-minirows" role="list">
+                    {% for row in tv_competitor_spikes[:4] %}
+                    <div class="tv-row" role="listitem">
+                      <div class="tv-row-left">
+                        <div class="tv-row-title">{{ row.entity_display }}</div>
+                        <div class="tv-row-sub">{{ row.current }} mentions (24h)</div>
+                      </div>
+                      <div class="tv-row-right">
+                        <span class="tv-delta {{ row.delta_class }}">{{ row.delta_text }}</span>
+                      </div>
+                    </div>
+                    {% else %}
+                    <div class="tv-row">
+                      <div class="tv-row-left">
+                        <div class="tv-row-title">No competitor spikes yet.</div>
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+
+                <div>
+                  <div class="tv-panel-sub" style="margin-bottom: 10px;">Emerging</div>
+                  <div class="tv-minirows" role="list">
+                    {% for row in tv_emerging_spikes[:4] %}
+                    <div class="tv-row" role="listitem">
+                      <div class="tv-row-left">
+                        <div class="tv-row-title">{{ row.entity_display }}</div>
+                        <div class="tv-row-sub">{{ row.current }} mentions (24h)</div>
+                      </div>
+                      <div class="tv-row-right">
+                        <span class="tv-delta {{ row.delta_class }}">{{ row.delta_text }}</span>
+                      </div>
+                    </div>
+                    {% else %}
+                    <div class="tv-row">
+                      <div class="tv-row-left">
+                        <div class="tv-row-title">No emerging spikes yet.</div>
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </article>
+          </section>
+
+          <section class="tv-page" data-page-key="sentiment" data-page-title="Sentiment">
+            <article class="tv-panel">
+              <div class="tv-panel-head">
+                <div>
+                  <h2 class="tv-panel-title">Sentiment Mix (30d)</h2>
+                  <div class="tv-panel-sub">High-engagement posts only</div>
+                </div>
+                {% if qrs.sentiment %}
+                <img class="tv-qr" src="{{ qrs.sentiment }}" alt="QR code: Sentiment details" />
+                {% endif %}
+              </div>
+
+              <div class="tv-minirows">
+                <div class="tv-row">
+                  <div class="tv-row-left">
+                    <div class="tv-row-title">Positive</div>
+                    <div class="tv-row-sub">sentiment ≥ 0.2</div>
+                  </div>
+                  <div class="tv-row-right">
+                    <div class="tv-metric-big" style="color: rgba(34, 197, 94, 0.95);">{{ sentiment_mix.positive }}</div>
+                  </div>
+                </div>
+                <div class="tv-row">
+                  <div class="tv-row-left">
+                    <div class="tv-row-title">Negative</div>
+                    <div class="tv-row-sub">sentiment ≤ -0.2</div>
+                  </div>
+                  <div class="tv-row-right">
+                    <div class="tv-metric-big" style="color: rgba(239, 68, 68, 0.95);">{{ sentiment_mix.negative }}</div>
+                  </div>
+                </div>
+                <div class="tv-row">
+                  <div class="tv-row-left">
+                    <div class="tv-row-title">Neutral</div>
+                    <div class="tv-row-sub">between -0.2 and 0.2</div>
+                  </div>
+                  <div class="tv-row-right">
+                    <div class="tv-metric-big" style="color: rgba(245, 158, 11, 0.95);">{{ sentiment_mix.neutral }}</div>
+                  </div>
+                </div>
+                <div class="tv-row">
+                  <div class="tv-row-left">
+                    <div class="tv-row-title">Avg Sentiment (7d)</div>
+                    <div class="tv-row-sub">directional signal</div>
+                  </div>
+                  <div class="tv-row-right">
+                    <div class="tv-metric-big">{{ sentiment_mix.avg7d }}</div>
+                  </div>
+                </div>
+              </div>
+          </article>
+
+          <article class="tv-panel">
+            <div class="tv-panel-head">
+              <div>
+                <h2 class="tv-panel-title">Top Negative (30d)</h2>
+                <div class="tv-panel-sub">Highest engagement</div>
+              </div>
+            </div>
+            <div class="tv-list" role="list">
+              {% for item in tv_sentiment_negative %}
+              <div class="tv-item" role="listitem">
+                <div class="tv-item-title">{{ item.title }}</div>
+                <div class="tv-item-meta">
+                  <span class="tv-pill">{{ item.source_name }}</span>
+                  <span class="tv-pill">{{ item.age }}</span>
+                  <span class="tv-pill is-negative">eng {{ item.engagement_score }}</span>
+                </div>
+              </div>
+              {% else %}
+              <div class="tv-item">
+                <div class="tv-item-title">No negative posts detected.</div>
+              </div>
+              {% endfor %}
+            </div>
+          </article>
+
+          <article class="tv-panel">
+            <div class="tv-panel-head">
+              <div>
+                <h2 class="tv-panel-title">Top Positive (30d)</h2>
+                <div class="tv-panel-sub">Highest engagement</div>
+              </div>
+            </div>
+            <div class="tv-list" role="list">
+              {% for item in tv_sentiment_positive %}
+              <div class="tv-item" role="listitem">
+                <div class="tv-item-title">{{ item.title }}</div>
+                <div class="tv-item-meta">
+                  <span class="tv-pill">{{ item.source_name }}</span>
+                  <span class="tv-pill">{{ item.age }}</span>
+                  <span class="tv-pill is-positive">eng {{ item.engagement_score }}</span>
+                </div>
+              </div>
+              {% else %}
+              <div class="tv-item">
+                <div class="tv-item-title">No positive posts detected.</div>
+              </div>
+              {% endfor %}
+            </div>
+          </article>
+        </section>
+
+          <section class="tv-page" data-page-key="competitors" data-page-title="Competitors">
+          <article class="tv-panel">
+            <div class="tv-panel-head">
+              <div>
+                <h2 class="tv-panel-title">Competitor Spikes (24h)</h2>
+                <div class="tv-panel-sub">vs prior 24h</div>
+              </div>
+              {% if qrs.competitors %}
+              <img class="tv-qr" src="{{ qrs.competitors }}" alt="QR code: Competitor details" />
+              {% endif %}
+            </div>
+            <div class="tv-minirows" role="list">
+              {% for row in tv_competitor_spikes[:6] %}
+              <div class="tv-row" role="listitem">
+                <div class="tv-row-left">
+                  <div class="tv-row-title">{{ row.entity_display }}</div>
+                  <div class="tv-row-sub">{{ row.current }} mentions (24h)</div>
+                </div>
+                <div class="tv-row-right">
+                  <span class="tv-delta {{ row.delta_class }}">{{ row.delta_text }}</span>
+                </div>
+              </div>
+              {% else %}
+              <div class="tv-row">
+                <div class="tv-row-left">
+                  <div class="tv-row-title">No competitor mentions yet.</div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </article>
+
+          <article class="tv-panel">
+            <div class="tv-panel-head">
+              <div>
+                <h2 class="tv-panel-title">Top Mentions (7d)</h2>
+                <div class="tv-panel-sub">volume + sentiment</div>
+              </div>
+            </div>
+            <div class="tv-minirows" role="list">
+              {% for row in competitor_rollup[:6] %}
+              <div class="tv-row" role="listitem">
+                <div class="tv-row-left">
+                  <div class="tv-row-title">{{ row.entity_display }}</div>
+                  <div class="tv-row-sub">{{ row.mentions }} mentions · avg {{ row.avg_sentiment }}</div>
+                </div>
+                <div class="tv-row-right">
+                  <span class="tv-pill {{ row.sentiment_class }}">{{ row.sentiment_label }}</span>
+                </div>
+              </div>
+              {% else %}
+              <div class="tv-row">
+                <div class="tv-row-left">
+                  <div class="tv-row-title">No rollup data yet.</div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </article>
+
+          <article class="tv-panel">
+            <div class="tv-panel-head">
+              <div>
+                <h2 class="tv-panel-title">Latest Signals</h2>
+                <div class="tv-panel-sub">news + public forums</div>
+              </div>
+            </div>
+            <div class="tv-list" role="list">
+              {% for item in tv_competitor_latest %}
+              <div class="tv-item" role="listitem">
+                <div class="tv-item-title">{{ item.title }}</div>
+                <div class="tv-item-meta">
+                  <span class="tv-pill">{{ item.entity_display }}</span>
+                  <span class="tv-pill">{{ item.source_name }}</span>
+                  <span class="tv-pill">{{ item.age }}</span>
+                </div>
+              </div>
+              {% else %}
+              <div class="tv-item">
+                <div class="tv-item-title">No competitor items yet.</div>
+              </div>
+              {% endfor %}
+            </div>
+          </article>
+        </section>
+
+          <section class="tv-page" data-page-key="emerging" data-page-title="Emerging">
+          <article class="tv-panel">
+            <div class="tv-panel-head">
+              <div>
+                <h2 class="tv-panel-title">Emerging Spikes (24h)</h2>
+                <div class="tv-panel-sub">vs prior 24h</div>
+              </div>
+              {% if qrs.emerging %}
+              <img class="tv-qr" src="{{ qrs.emerging }}" alt="QR code: Emerging details" />
+              {% endif %}
+            </div>
+            <div class="tv-minirows" role="list">
+              {% for row in tv_emerging_spikes[:6] %}
+              <div class="tv-row" role="listitem">
+                <div class="tv-row-left">
+                  <div class="tv-row-title">{{ row.entity_display }}</div>
+                  <div class="tv-row-sub">{{ row.current }} mentions (24h)</div>
+                </div>
+                <div class="tv-row-right">
+                  <span class="tv-delta {{ row.delta_class }}">{{ row.delta_text }}</span>
+                </div>
+              </div>
+              {% else %}
+              <div class="tv-row">
+                <div class="tv-row-left">
+                  <div class="tv-row-title">No emerging mentions yet.</div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </article>
+
+          <article class="tv-panel">
+            <div class="tv-panel-head">
+              <div>
+                <h2 class="tv-panel-title">Leaderboard (14d)</h2>
+                <div class="tv-panel-sub">mentions + max relevance</div>
+              </div>
+              {% if qrs.emerging %}
+              <img class="tv-qr" src="{{ qrs.emerging }}" alt="QR code: Emerging details" />
+              {% endif %}
+            </div>
+            <div class="tv-minirows" role="list">
+              {% for row in emerging_rollup[:6] %}
+              <div class="tv-row" role="listitem">
+                <div class="tv-row-left">
+                  <div class="tv-row-title">{{ row.entity_display }}</div>
+                  <div class="tv-row-sub">{{ row.mentions }} mentions · max rel {{ row.max_relevance }}</div>
+                </div>
+                <div class="tv-row-right">
+                  <span class="tv-pill is-accent">watch</span>
+                </div>
+              </div>
+              {% else %}
+              <div class="tv-row">
+                <div class="tv-row-left">
+                  <div class="tv-row-title">No emerging entities yet.</div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </article>
+
+          <article class="tv-panel">
+            <div class="tv-panel-head">
+              <div>
+                <h2 class="tv-panel-title">Latest Signals</h2>
+                <div class="tv-panel-sub">newest + highest relevance</div>
+              </div>
+            </div>
+            <div class="tv-list" role="list">
+              {% for item in tv_emerging_latest %}
+              <div class="tv-item" role="listitem">
+                <div class="tv-item-title">{{ item.title }}</div>
+                <div class="tv-item-meta">
+                  <span class="tv-pill">{{ item.entity_display }}</span>
+                  <span class="tv-pill">{{ item.source_name }}</span>
+                  <span class="tv-pill">{{ item.age }}</span>
+                </div>
+              </div>
+              {% else %}
+              <div class="tv-item">
+                <div class="tv-item-title">No emerging items yet.</div>
+              </div>
+              {% endfor %}
+            </div>
+          </article>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.wyzeIntelTv = {
+        sparks: {{ sparks|tojson }}
+      };
+    </script>
+    <script src="/static/dashboard.js"></script>
+    <script src="/static/tv.js"></script>
+  </body>
+</html>

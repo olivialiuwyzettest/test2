@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card" style="margin-bottom: 1rem;">
+  <h2 style="margin-bottom:0.4rem;">Main Intel Hub</h2>
+  {% if last_refresh %}
+  <div class="meta">
+    Last refresh: {{ last_refresh.completed_at.strftime('%Y-%m-%d %H:%M UTC') if last_refresh.completed_at else 'running' }}
+    | status: {{ last_refresh.status }}
+    | {{ last_refresh.message }}
+  </div>
+  {% else %}
+  <div class="meta">No refresh run yet. Data appears after first scheduler run.</div>
+  {% endif %}
+</section>
+
+<section class="grid metrics" style="margin-bottom: 1rem;">
+  <article class="card">
+    <h3>Wyze Mentions (24h)</h3>
+    <p class="metric-value">{{ metrics.wyze_mentions }}</p>
+    <p class="metric-sub">News + forum discussions</p>
+  </article>
+  <article class="card">
+    <h3>Sentiment Posts (24h)</h3>
+    <p class="metric-value">{{ metrics.sentiment_mentions }}</p>
+    <p class="metric-sub">High-engagement public forums</p>
+  </article>
+  <article class="card">
+    <h3>Main Competitor Mentions (24h)</h3>
+    <p class="metric-value">{{ metrics.competitor_mentions }}</p>
+    <p class="metric-sub">Ring, Blink, Eufy, TP-Link, Reolink, Arlo</p>
+  </article>
+  <article class="card">
+    <h3>Emerging Competitor Mentions (24h)</h3>
+    <p class="metric-value">{{ metrics.emerging_mentions }}</p>
+    <p class="metric-sub">New players in AI monitoring + smart security</p>
+  </article>
+</section>
+
+<section class="grid columns-2">
+  <article class="card">
+    <h3>Latest Wyze Signals</h3>
+    <div class="list">
+      {% for item in wyze_latest %}
+      <div class="list-item">
+        <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.title }}</a>
+        <div class="meta">{{ item.source_name }} | {{ item.published_at.strftime('%Y-%m-%d %H:%M UTC') }} | relevance {{ '%.2f'|format(item.relevance_score) }}</div>
+      </div>
+      {% else %}
+      <div class="small-note">No Wyze items yet.</div>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article class="card">
+    <h3>Latest High-Engagement Sentiment</h3>
+    <div class="list">
+      {% for item in sentiment_latest %}
+      <div class="list-item">
+        <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.title }}</a>
+        <div class="meta">{{ item.source_name }} | engagement {{ item.engagement_score }}</div>
+        <div class="sentiment {{ 'positive' if item.sentiment_score >= 0.2 else 'negative' if item.sentiment_score <= -0.2 else 'neutral' }}">
+          sentiment {{ '%.2f'|format(item.sentiment_score) }}
+        </div>
+      </div>
+      {% else %}
+      <div class="small-note">No sentiment items yet.</div>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article class="card">
+    <h3>Latest Main Competitor Signals</h3>
+    <div class="list">
+      {% for item in competitor_latest %}
+      <div class="list-item">
+        <span class="tag">{{ item.entity }}</span>
+        <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.title }}</a>
+        <div class="meta">{{ item.source_name }} | {{ item.published_at.strftime('%Y-%m-%d %H:%M UTC') }}</div>
+      </div>
+      {% else %}
+      <div class="small-note">No competitor items yet.</div>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article class="card">
+    <h3>Latest Emerging Competitor Signals</h3>
+    <div class="list">
+      {% for item in emerging_latest %}
+      <div class="list-item">
+        <span class="tag">{{ item.entity }}</span>
+        <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.title }}</a>
+        <div class="meta">{{ item.source_name }} | relevance {{ '%.2f'|format(item.relevance_score) }}</div>
+      </div>
+      {% else %}
+      <div class="small-note">No emerging competitor items yet.</div>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+{% endblock %}

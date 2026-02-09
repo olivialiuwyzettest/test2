@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  web:
+    build:
+      context: ./apps/web
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "file:/data/dev.db"
+      FLIGHT_PROVIDER: "mock"
+      SCAN_TIMEZONE: "America/Los_Angeles"
+      SCAN_CRON: "0 6 * * *"
+      RUN_SCAN_ON_STARTUP: "false"
+      RUN_DB_SETUP: "true"
+    volumes:
+      - flight-db:/data
+
+  worker:
+    build:
+      context: ./apps/web
+    command: ["npm", "run", "worker"]
+    environment:
+      DATABASE_URL: "file:/data/dev.db"
+      FLIGHT_PROVIDER: "mock"
+      SCAN_TIMEZONE: "America/Los_Angeles"
+      SCAN_CRON: "0 6 * * *"
+      RUN_SCAN_ON_STARTUP: "true"
+      RUN_DB_SETUP: "false"
+    volumes:
+      - flight-db:/data
+
+volumes:
+  flight-db:

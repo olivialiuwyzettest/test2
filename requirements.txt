@@ -1,0 +1,11 @@
+fastapi==0.115.11
+uvicorn[standard]==0.34.0
+SQLAlchemy==2.0.38
+Jinja2==3.1.5
+requests==2.32.3
+feedparser==6.0.11
+APScheduler==3.11.0
+python-dateutil==2.9.0.post0
+vaderSentiment==3.3.2
+pydantic-settings==2.7.1
+segno==1.6.1

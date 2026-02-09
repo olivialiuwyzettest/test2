@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum ScanRunStatus {
+  RUNNING
+  SUCCESS
+  PARTIAL
+  FAILED
+}
+
+enum CabinClass {
+  ECONOMY
+  PREMIUM_ECONOMY
+  BUSINESS
+  FIRST
+}
+
+enum StopsCategory {
+  NONSTOP
+  ONE_STOP_OVERNIGHT
+}
+
+model ScanRun {
+  id         String        @id @default(cuid())
+  provider   String
+  startedAt  DateTime      @default(now())
+  finishedAt DateTime?
+  status     ScanRunStatus @default(RUNNING)
+
+  // Search configuration and aggregate stats.
+  configJson            Json
+  combosTotal           Int @default(0)
+  combosSkippedSchedule Int @default(0)
+  queriesNonstop        Int @default(0)
+  queriesOneStop        Int @default(0)
+
+  offersFound    Int  @default(0)
+  offersUpserted Int  @default(0)
+  offersUpdated  Int  @default(0)
+  errorsJson     Json?
+
+  priceHistory PriceHistory[]
+
+  @@index([provider, startedAt])
+  @@index([status, startedAt])
+}
+
+model Offer {
+  id              String  @id @default(cuid())
+  provider        String
+  providerOfferId String?
+  offerKey        String
+
+  origin      String
+  destination String
+  departDate  String // YYYY-MM-DD
+  returnDate  String // YYYY-MM-DD
+
+  cabin           CabinClass
+  stopsTotal      Int
+  stopsCategory   StopsCategory
+  overnightLayover Boolean @default(false)
+
+  // Normalized itinerary details.
+  segmentsJson                Json
+  totalDurationOutboundMinutes Int?
+  totalDurationInboundMinutes  Int?
+  totalTripMinutes             Int?
+
+  // Pricing is stored as integer cents to avoid float drift.
+  currency         String
+  priceTotalCents  Int
+  groupAdults      Int
+  groupChildren    Int
+  pricePerAdultCents Int?
+  pricePerChildCents Int?
+
+  deepLink   String?
+  rawPayload Json?
+  lastSeenAt DateTime @default(now())
+
+  // Deal scoring (updated after scans).
+  dealScore               Int?
+  isGreatDeal             Boolean @default(false)
+  dealRationale           Json?
+  pricePercentile         Float?
+  comparableMedianPriceCents Int?
+  priceDrop7dPct          Float?
+  durationVsMedianMinutes Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  priceHistory PriceHistory[]
+
+  @@unique([provider, offerKey])
+  @@unique([provider, providerOfferId])
+  @@index([origin, destination, departDate, returnDate])
+  @@index([isGreatDeal, dealScore])
+}
+
+model PriceHistory {
+  id         String   @id @default(cuid())
+  offerId    String
+  scanRunId  String
+  capturedAt DateTime @default(now())
+
+  currency        String
+  priceTotalCents Int
+  rawPrice        Json?
+
+  offer   Offer   @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  scanRun ScanRun @relation(fields: [scanRunId], references: [id], onDelete: Cascade)
+
+  @@index([offerId, capturedAt])
+  @@index([scanRunId, capturedAt])
+}
+
+model ProviderQuotaDay {
+  id           String   @id @default(cuid())
+  provider     String
+  day          String   // YYYY-MM-DD (in SCAN_TIMEZONE)
+  requestCount Int      @default(0)
+  successCount Int      @default(0)
+  errorCount   Int      @default(0)
+  lastError    String?
+  updatedAt    DateTime @updatedAt
+
+  @@unique([provider, day])
+  @@index([day, provider])
+}
+

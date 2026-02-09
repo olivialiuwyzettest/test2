@@ -1,0 +1,42 @@
+:root {
+  /* Brand */
+  --primary-500: #7951d6;
+  --primary-600: #6a46c3;
+  --primary-700: #5b3ba8;
+  --primary-200: #d8ccf6;
+  --primary-100: #eee8fb;
+
+  /* Default (non-TV) theme: light */
+  --bg: #ffffff;
+  --bg-2: #f7f5ff;
+  --surface-1: #ffffff;
+  --surface-2: #ffffff;
+  --border: rgba(15, 23, 42, 0.12);
+  --border-strong: rgba(15, 23, 42, 0.22);
+  --text: #0f172a;
+  --text-muted: #475569;
+
+  /* Semantic */
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --info: #0284c7;
+
+  /* Helpful overlays */
+  --primary-subtle: rgba(121, 81, 214, 0.12);
+  --primary-hover: rgba(121, 81, 214, 0.18);
+  --primary-border: rgba(121, 81, 214, 0.35);
+
+  /* App aliases (legacy names used by styles.css/dashboard.js) */
+  --panel: var(--surface-1);
+  --panel-2: var(--surface-2);
+  --muted: var(--text-muted);
+  --accent: var(--primary-500);
+  --accent-2: var(--primary-600);
+  --good: var(--success);
+  --bad: var(--danger);
+  --warn: var(--warning);
+  --shadow: 0 12px 28px rgba(15, 23, 42, 0.09);
+}
+
+/* TV theme overrides live in tv.css (scoped to body.mode-tv). */

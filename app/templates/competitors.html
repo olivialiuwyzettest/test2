@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card" style="margin-bottom: 1rem;">
+  <h2>Main Competitor Tracker</h2>
+  <div class="meta">
+    Tracks Ring, Blink, Eufy, TP-Link, Reolink, and Arlo from latest news and public forums.
+    {% if last_refresh and last_refresh.completed_at %}
+    Last refresh: {{ last_refresh.completed_at.strftime('%Y-%m-%d %H:%M UTC') }}
+    {% endif %}
+  </div>
+</section>
+
+<section class="card table-wrap" style="margin-bottom: 1rem;">
+  <h3>7-Day Competitor Rollup</h3>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Competitor</th>
+        <th>Mentions</th>
+        <th>Avg Sentiment</th>
+        <th>Last Seen</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rollup %}
+      <tr>
+        <td><span class="tag">{{ row.entity }}</span></td>
+        <td>{{ row.mentions }}</td>
+        <td class="sentiment {{ 'positive' if row.avg_sentiment >= 0.2 else 'negative' if row.avg_sentiment <= -0.2 else 'neutral' }}">{{ '%.2f'|format(row.avg_sentiment) }}</td>
+        <td>{{ row.last_seen.strftime('%Y-%m-%d %H:%M') if row.last_seen else '-' }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="4">No data yet.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="card table-wrap">
+  <h3>Latest Competitor Signals</h3>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Published</th>
+        <th>Entity</th>
+        <th>Source</th>
+        <th>Title</th>
+        <th>Engagement</th>
+        <th>Relevance</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>{{ item.published_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td><span class="tag">{{ item.entity }}</span></td>
+        <td>{{ item.source_name }}</td>
+        <td><a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.title }}</a></td>
+        <td>{{ item.engagement_score }}</td>
+        <td>{{ '%.2f'|format(item.relevance_score) }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6">No data yet.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
