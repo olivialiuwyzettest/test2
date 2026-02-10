@@ -409,9 +409,9 @@ sentimentIndex = clamp(round((avgScore + 1) * 50), 0, 100)`}
                 brands.
               </p>
               <p>
-                For Reddit, make sure you include <b>competitor forums</b> (not just
-                Wyze) when you enable subreddit scanning, otherwise conclusions may
-                be biased.
+                For Reddit, this project supports scanning <b>competitor forums</b>
+                (not just Wyze). This reduces bias because brand forums often omit
+                the brand name in posts.
               </p>
               <p className="text-xs">
                 Tip: set{" "}

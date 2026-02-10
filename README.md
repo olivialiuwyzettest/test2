@@ -43,6 +43,17 @@ Notes:
 - Coverage note: if you restrict ingestion to only one brand community (e.g., only Wyze),
   competitor comparisons will be biased. Include competitor sources too.
 
+### Reddit Coverage (Competitor Forums)
+
+The Reddit connector uses the official API and:
+
+- Searches for mentions of all tracked brands (Wyze + competitors), and
+- By default also scans a set of brand/community subreddits so competitor forums
+  are included even when posts omit the brand name.
+
+You can override the scanned subreddits via `REDDIT_SUBREDDITS`, or disable forum
+scanning via `REDDIT_SCAN_FORUMS=false`.
+
 ## Deployment (Vercel)
 
 1. Import the repo in Vercel

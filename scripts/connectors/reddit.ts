@@ -90,6 +90,33 @@ function defaultQuery() {
   return brands.map((b) => `"${b}"`).join(" OR ");
 }
 
+function defaultForumSubreddits() {
+  // A pragmatic default list so competitor comparisons are not biased toward only
+  // one brand community. Users can override with REDDIT_SUBREDDITS.
+  return [
+    "wyzecam",
+    "ring",
+    "arlo",
+    "eufycam",
+    "eufysecurity",
+    "googlehome",
+    "nest",
+    "blinkcameras",
+    "reolinkcam",
+    "homeautomation",
+    "homeassistant",
+    "smarthome",
+  ];
+}
+
+function envFlag(name: string, defaultValue: boolean) {
+  const v = process.env[name];
+  if (v === undefined) return defaultValue;
+  const s = v.trim().toLowerCase();
+  if (!s) return defaultValue;
+  return !["0", "false", "no", "off"].includes(s);
+}
+
 function normalize(input: string) {
   return (input || "").trim().toLowerCase();
 }
@@ -167,8 +194,14 @@ export const redditConnector: Connector = {
     if (!token) return [];
 
     const query = process.env.REDDIT_QUERY || defaultQuery();
-    const subreddits = splitCsv(process.env.REDDIT_SUBREDDITS);
-    const subredditParam = subreddits.length ? `&sr_name=${encodeURIComponent(subreddits.join(","))}` : "";
+    const configuredSubreddits = splitCsv(process.env.REDDIT_SUBREDDITS);
+    const subredditParam = configuredSubreddits.length
+      ? `&sr_name=${encodeURIComponent(configuredSubreddits.join(","))}`
+      : "";
+    const forumSubreddits = configuredSubreddits.length
+      ? configuredSubreddits
+      : defaultForumSubreddits();
+    const scanForums = envFlag("REDDIT_SCAN_FORUMS", true);
 
     const headers = {
       Authorization: `Bearer ${token.access_token}`,
@@ -200,8 +233,8 @@ export const redditConnector: Connector = {
     // pull the newest posts from those subreddits. This helps avoid bias where
     // brand forums omit the brand name in titles/selftext (e.g., posts in r/ring
     // that never say "Ring").
-    if (subreddits.length) {
-      const perSub = await mapWithConcurrency(subreddits, 4, async (sr) => {
+    if (scanForums && forumSubreddits.length) {
+      const perSub = await mapWithConcurrency(forumSubreddits, 4, async (sr) => {
         const url = `https://oauth.reddit.com/r/${encodeURIComponent(sr)}/new?limit=50`;
         const res = await fetch(url, { headers });
         if (!res.ok) return [] as Mention[];
