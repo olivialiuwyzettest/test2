@@ -1,10 +1,10 @@
 {
   "timezone": "America/Los_Angeles",
-  "generatedAt": "2026-02-09T20:45:50.381Z",
+  "generatedAt": "2026-02-10T06:52:45.892Z",
   "today": {
     "date": "2026-02-09",
     "timezone": "America/Los_Angeles",
-    "generatedAt": "2026-02-09T20:47:08.160Z",
+    "generatedAt": "2026-02-10T06:52:45.892Z",
     "totals": {
       "mentions": 18,
       "mentionsByBrand": {
@@ -15,7 +15,13 @@
         "Google Nest": 2,
         "Blink": 2,
         "Reolink": 2
-      }
+      },
+      "mentionsBySource": {
+        "rss": 5,
+        "news": 3,
+        "reddit": 10
+      },
+      "mentionsBySubreddit": {}
     },
     "sentimentAvg": {
       "overall": -0.1111111111111111,
@@ -278,7 +284,7 @@
   "yesterday": {
     "date": "2026-02-08",
     "timezone": "America/Los_Angeles",
-    "generatedAt": "2026-02-08T20:47:08.160Z",
+    "generatedAt": "2026-02-09T06:52:45.892Z",
     "totals": {
       "mentions": 17,
       "mentionsByBrand": {
@@ -289,7 +295,13 @@
         "Google Nest": 2,
         "Blink": 0,
         "Reolink": 1
-      }
+      },
+      "mentionsBySource": {
+        "reddit": 11,
+        "news": 3,
+        "rss": 3
+      },
+      "mentionsBySubreddit": {}
     },
     "sentimentAvg": {
       "overall": -0.029411764705882353,

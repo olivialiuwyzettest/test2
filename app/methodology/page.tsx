@@ -83,6 +83,11 @@ export default function MethodologyPage() {
               against the brand list above.
             </p>
             <p className="text-muted-foreground">
+              Coverage note (important): if you only ingest one brand’s forum (e.g.
+              only Wyze), competitor comparisons will be biased. When enabling
+              Reddit/RSS, include competitor communities and feeds too.
+            </p>
+            <p className="text-muted-foreground">
               Note: This is an MVP matching approach. For production use, upgrade
               brand/entity detection (e.g., context-aware LLM classification with
               citations) to reduce false matches.
@@ -226,4 +231,3 @@ group by topic; explanation uses most frequent keyPhrase for that topic`}
     </main>
   );
 }
-

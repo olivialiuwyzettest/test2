@@ -1,57 +1,225 @@
 {
   "timezone": "America/Los_Angeles",
-  "generatedAt": "2026-02-09T20:43:42.472Z",
+  "generatedAt": "2026-02-10T06:52:45.892Z",
   "days": [
     {
       "date": "2026-01-11",
       "mentions": 11,
-      "sentimentAvg": 0.022727272727272728,
-      "sentimentIndex": 51,
+      "sentimentAvg": 0.045454545454545456,
+      "sentimentIndex": 52,
       "sentimentDistribution": {
-        "positive": 1,
-        "neutral": 10,
+        "positive": 2,
+        "neutral": 9,
         "negative": 0,
         "unknown": 0
       }
     },
     {
       "date": "2026-01-12",
-      "mentions": 10,
-      "sentimentAvg": 0,
-      "sentimentIndex": 50,
+      "mentions": 14,
+      "sentimentAvg": 0.017857142857142856,
+      "sentimentIndex": 51,
       "sentimentDistribution": {
         "positive": 2,
-        "neutral": 6,
-        "negative": 2,
+        "neutral": 11,
+        "negative": 1,
         "unknown": 0
       }
     },
     {
       "date": "2026-01-13",
-      "mentions": 20,
-      "sentimentAvg": -0.0375,
+      "mentions": 17,
+      "sentimentAvg": -0.04411764705882353,
       "sentimentIndex": 48,
       "sentimentDistribution": {
         "positive": 0,
-        "neutral": 17,
+        "neutral": 14,
         "negative": 3,
         "unknown": 0
       }
     },
     {
       "date": "2026-01-14",
-      "mentions": 9,
-      "sentimentAvg": -0.08333333333333333,
-      "sentimentIndex": 46,
+      "mentions": 12,
+      "sentimentAvg": -0.041666666666666664,
+      "sentimentIndex": 48,
       "sentimentDistribution": {
         "positive": 0,
+        "neutral": 10,
+        "negative": 2,
+        "unknown": 0
+      }
+    },
+    {
+      "date": "2026-01-15",
+      "mentions": 10,
+      "sentimentAvg": -0.1,
+      "sentimentIndex": 45,
+      "sentimentDistribution": {
+        "positive": 0,
+        "neutral": 6,
+        "negative": 4,
+        "unknown": 0
+      }
+    },
+    {
+      "date": "2026-01-16",
+      "mentions": 13,
+      "sentimentAvg": -0.038461538461538464,
+      "sentimentIndex": 48,
+      "sentimentDistribution": {
+        "positive": 0,
+        "neutral": 11,
+        "negative": 2,
+        "unknown": 0
+      }
+    },
+    {
+      "date": "2026-01-17",
+      "mentions": 14,
+      "sentimentAvg": -0.05357142857142857,
+      "sentimentIndex": 47,
+      "sentimentDistribution": {
+        "positive": 1,
+        "neutral": 9,
+        "negative": 4,
+        "unknown": 0
+      }
+    },
+    {
+      "date": "2026-01-18",
+      "mentions": 13,
+      "sentimentAvg": 0,
+      "sentimentIndex": 50,
+      "sentimentDistribution": {
+        "positive": 1,
+        "neutral": 11,
+        "negative": 1,
+        "unknown": 0
+      }
+    },
+    {
+      "date": "2026-01-19",
+      "mentions": 15,
+      "sentimentAvg": -0.03333333333333333,
+      "sentimentIndex": 48,
+      "sentimentDistribution": {
+        "positive": 2,
+        "neutral": 9,
+        "negative": 4,
+        "unknown": 0
+      }
+    },
+    {
+      "date": "2026-01-20",
+      "mentions": 17,
+      "sentimentAvg": -0.029411764705882353,
+      "sentimentIndex": 49,
+      "sentimentDistribution": {
+        "positive": 3,
+        "neutral": 9,
+        "negative": 5,
+        "unknown": 0
+      }
+    },
+    {
+      "date": "2026-01-21",
+      "mentions": 13,
+      "sentimentAvg": 0,
+      "sentimentIndex": 50,
+      "sentimentDistribution": {
+        "positive": 1,
+        "neutral": 11,
+        "negative": 1,
+        "unknown": 0
+      }
+    },
+    {
+      "date": "2026-01-22",
+      "mentions": 10,
+      "sentimentAvg": -0.025,
+      "sentimentIndex": 49,
+      "sentimentDistribution": {
+        "positive": 2,
+        "neutral": 5,
+        "negative": 3,
+        "unknown": 0
+      }
+    },
+    {
+      "date": "2026-01-23",
+      "mentions": 11,
+      "sentimentAvg": -0.022727272727272728,
+      "sentimentIndex": 49,
+      "sentimentDistribution": {
+        "positive": 2,
         "neutral": 6,
         "negative": 3,
         "unknown": 0
       }
     },
     {
-      "date": "2026-01-15",
+      "date": "2026-01-24",
+      "mentions": 16,
+      "sentimentAvg": -0.03125,
+      "sentimentIndex": 48,
+      "sentimentDistribution": {
+        "positive": 2,
+        "neutral": 10,
+        "negative": 4,
+        "unknown": 0
+      }
+    },
+    {
+      "date": "2026-01-25",
+      "mentions": 13,
+      "sentimentAvg": -0.038461538461538464,
+      "sentimentIndex": 48,
+      "sentimentDistribution": {
+        "positive": 1,
+        "neutral": 9,
+        "negative": 3,
+        "unknown": 0
+      }
+    },
+    {
+      "date": "2026-01-26",
+      "mentions": 14,
+      "sentimentAvg": -0.017857142857142856,
+      "sentimentIndex": 49,
+      "sentimentDistribution": {
+        "positive": 2,
+        "neutral": 9,
+        "negative": 3,
+        "unknown": 0
+      }
+    },
+    {
+      "date": "2026-01-27",
+      "mentions": 13,
+      "sentimentAvg": -0.019230769230769232,
+      "sentimentIndex": 49,
+      "sentimentDistribution": {
+        "positive": 2,
+        "neutral": 8,
+        "negative": 3,
+        "unknown": 0
+      }
+    },
+    {
+      "date": "2026-01-28",
+      "mentions": 14,
+      "sentimentAvg": -0.05357142857142857,
+      "sentimentIndex": 47,
+      "sentimentDistribution": {
+        "positive": 0,
+        "neutral": 11,
+        "negative": 3,
+        "unknown": 0
+      }
+    },
+    {
+      "date": "2026-01-29",
       "mentions": 15,
       "sentimentAvg": -0.06666666666666667,
       "sentimentIndex": 47,
@@ -63,182 +231,14 @@
       }
     },
     {
-      "date": "2026-01-16",
-      "mentions": 11,
-      "sentimentAvg": -0.06818181818181818,
-      "sentimentIndex": 47,
-      "sentimentDistribution": {
-        "positive": 0,
-        "neutral": 8,
-        "negative": 3,
-        "unknown": 0
-      }
-    },
-    {
-      "date": "2026-01-17",
-      "mentions": 18,
-      "sentimentAvg": 0.013888888888888888,
-      "sentimentIndex": 51,
-      "sentimentDistribution": {
-        "positive": 2,
-        "neutral": 15,
-        "negative": 1,
-        "unknown": 0
-      }
-    },
-    {
-      "date": "2026-01-18",
-      "mentions": 7,
-      "sentimentAvg": -0.07142857142857142,
-      "sentimentIndex": 46,
-      "sentimentDistribution": {
-        "positive": 0,
-        "neutral": 5,
-        "negative": 2,
-        "unknown": 0
-      }
-    },
-    {
-      "date": "2026-01-19",
-      "mentions": 19,
-      "sentimentAvg": -0.05263157894736842,
-      "sentimentIndex": 47,
-      "sentimentDistribution": {
-        "positive": 2,
-        "neutral": 11,
-        "negative": 6,
-        "unknown": 0
-      }
-    },
-    {
-      "date": "2026-01-20",
-      "mentions": 14,
-      "sentimentAvg": 0.017857142857142856,
-      "sentimentIndex": 51,
-      "sentimentDistribution": {
-        "positive": 3,
-        "neutral": 9,
-        "negative": 2,
-        "unknown": 0
-      }
-    },
-    {
-      "date": "2026-01-21",
-      "mentions": 12,
-      "sentimentAvg": -0.020833333333333332,
-      "sentimentIndex": 49,
-      "sentimentDistribution": {
-        "positive": 1,
-        "neutral": 9,
-        "negative": 2,
-        "unknown": 0
-      }
-    },
-    {
-      "date": "2026-01-22",
-      "mentions": 13,
-      "sentimentAvg": -0.019230769230769232,
-      "sentimentIndex": 49,
-      "sentimentDistribution": {
-        "positive": 3,
-        "neutral": 6,
-        "negative": 4,
-        "unknown": 0
-      }
-    },
-    {
-      "date": "2026-01-23",
-      "mentions": 11,
-      "sentimentAvg": -0.022727272727272728,
-      "sentimentIndex": 49,
-      "sentimentDistribution": {
-        "positive": 1,
-        "neutral": 8,
-        "negative": 2,
-        "unknown": 0
-      }
-    },
-    {
-      "date": "2026-01-24",
-      "mentions": 16,
-      "sentimentAvg": -0.046875,
-      "sentimentIndex": 48,
-      "sentimentDistribution": {
-        "positive": 2,
-        "neutral": 9,
-        "negative": 5,
-        "unknown": 0
-      }
-    },
-    {
-      "date": "2026-01-25",
-      "mentions": 12,
-      "sentimentAvg": -0.041666666666666664,
-      "sentimentIndex": 48,
-      "sentimentDistribution": {
-        "positive": 1,
-        "neutral": 8,
-        "negative": 3,
-        "unknown": 0
-      }
-    },
-    {
-      "date": "2026-01-26",
-      "mentions": 15,
-      "sentimentAvg": -0.016666666666666666,
-      "sentimentIndex": 49,
-      "sentimentDistribution": {
-        "positive": 2,
-        "neutral": 10,
-        "negative": 3,
-        "unknown": 0
-      }
-    },
-    {
-      "date": "2026-01-27",
-      "mentions": 12,
-      "sentimentAvg": 0,
-      "sentimentIndex": 50,
-      "sentimentDistribution": {
-        "positive": 2,
-        "neutral": 8,
-        "negative": 2,
-        "unknown": 0
-      }
-    },
-    {
-      "date": "2026-01-28",
-      "mentions": 16,
-      "sentimentAvg": -0.0625,
-      "sentimentIndex": 47,
-      "sentimentDistribution": {
-        "positive": 0,
-        "neutral": 12,
-        "negative": 4,
-        "unknown": 0
-      }
-    },
-    {
-      "date": "2026-01-29",
-      "mentions": 11,
-      "sentimentAvg": -0.06818181818181818,
-      "sentimentIndex": 47,
-      "sentimentDistribution": {
-        "positive": 0,
-        "neutral": 8,
-        "negative": 3,
-        "unknown": 0
-      }
-    },
-    {
       "date": "2026-01-30",
-      "mentions": 13,
-      "sentimentAvg": -0.057692307692307696,
-      "sentimentIndex": 47,
+      "mentions": 10,
+      "sentimentAvg": -0.025,
+      "sentimentIndex": 49,
       "sentimentDistribution": {
         "positive": 0,
-        "neutral": 10,
-        "negative": 3,
+        "neutral": 9,
+        "negative": 1,
         "unknown": 0
       }
     },
@@ -256,97 +256,97 @@
     },
     {
       "date": "2026-02-01",
-      "mentions": 15,
-      "sentimentAvg": -0.05,
-      "sentimentIndex": 48,
+      "mentions": 13,
+      "sentimentAvg": -0.11538461538461539,
+      "sentimentIndex": 44,
       "sentimentDistribution": {
         "positive": 1,
-        "neutral": 10,
-        "negative": 4,
+        "neutral": 5,
+        "negative": 7,
         "unknown": 0
       }
     },
     {
       "date": "2026-02-02",
-      "mentions": 14,
-      "sentimentAvg": 0.017857142857142856,
+      "mentions": 16,
+      "sentimentAvg": 0.015625,
       "sentimentIndex": 51,
       "sentimentDistribution": {
-        "positive": 4,
-        "neutral": 7,
-        "negative": 3,
+        "positive": 2,
+        "neutral": 13,
+        "negative": 1,
         "unknown": 0
       }
     },
     {
       "date": "2026-02-03",
       "mentions": 13,
-      "sentimentAvg": -0.07692307692307693,
-      "sentimentIndex": 46,
+      "sentimentAvg": -0.019230769230769232,
+      "sentimentIndex": 49,
       "sentimentDistribution": {
-        "positive": 1,
-        "neutral": 7,
-        "negative": 5,
-        "unknown": 0
-      }
-    },
-    {
-      "date": "2026-02-04",
-      "mentions": 15,
-      "sentimentAvg": -0.06666666666666667,
-      "sentimentIndex": 47,
-      "sentimentDistribution": {
-        "positive": 0,
-        "neutral": 11,
+        "positive": 3,
+        "neutral": 6,
         "negative": 4,
         "unknown": 0
       }
     },
     {
-      "date": "2026-02-05",
-      "mentions": 15,
-      "sentimentAvg": -0.05,
-      "sentimentIndex": 48,
+      "date": "2026-02-04",
+      "mentions": 16,
+      "sentimentAvg": -0.078125,
+      "sentimentIndex": 46,
       "sentimentDistribution": {
-        "positive": 1,
-        "neutral": 10,
+        "positive": 0,
+        "neutral": 11,
+        "negative": 5,
+        "unknown": 0
+      }
+    },
+    {
+      "date": "2026-02-05",
+      "mentions": 13,
+      "sentimentAvg": -0.07692307692307693,
+      "sentimentIndex": 46,
+      "sentimentDistribution": {
+        "positive": 0,
+        "neutral": 9,
         "negative": 4,
         "unknown": 0
       }
     },
     {
       "date": "2026-02-06",
-      "mentions": 17,
-      "sentimentAvg": -0.014705882352941176,
-      "sentimentIndex": 49,
+      "mentions": 19,
+      "sentimentAvg": 0.013157894736842105,
+      "sentimentIndex": 51,
       "sentimentDistribution": {
-        "positive": 2,
-        "neutral": 12,
-        "negative": 3,
+        "positive": 3,
+        "neutral": 14,
+        "negative": 2,
         "unknown": 0
       }
     },
     {
       "date": "2026-02-07",
-      "mentions": 16,
-      "sentimentAvg": 0,
-      "sentimentIndex": 50,
+      "mentions": 13,
+      "sentimentAvg": -0.019230769230769232,
+      "sentimentIndex": 49,
       "sentimentDistribution": {
-        "positive": 3,
-        "neutral": 10,
+        "positive": 2,
+        "neutral": 8,
         "negative": 3,
         "unknown": 0
       }
     },
     {
       "date": "2026-02-08",
-      "mentions": 15,
-      "sentimentAvg": -0.08333333333333333,
+      "mentions": 23,
+      "sentimentAvg": -0.07608695652173914,
       "sentimentIndex": 46,
       "sentimentDistribution": {
-        "positive": 1,
-        "neutral": 8,
-        "negative": 6,
+        "positive": 2,
+        "neutral": 12,
+        "negative": 9,
         "unknown": 0
       }
     },

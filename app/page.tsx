@@ -316,6 +316,118 @@ export default async function HomePage() {
 
       <section className="mt-10">
         <SectionHeading
+          title="Methodology & Sources"
+          subtitle="Clear definitions for the metrics above (last 24h)."
+          right={
+            <Button asChild variant="outline" size="sm">
+              <Link href="/methodology">Full methodology</Link>
+            </Button>
+          }
+        />
+        <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <Card className="animate-fade-up">
+            <CardHeader>
+              <CardTitle>How Sentiment Is Calculated</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <p className="text-muted-foreground">
+                Each mention is enriched with a <b>sentimentScore</b> in{" "}
+                <code className="rounded bg-secondary px-1.5 py-0.5">[-1, 1]</code>{" "}
+                and a label (positive / neutral / negative).
+              </p>
+              <pre className="overflow-auto rounded-lg border bg-card/60 p-3 text-xs text-muted-foreground">
+{`avgScore = mean(sentimentScore)
+sentimentIndex = clamp(round((avgScore + 1) * 50), 0, 100)`}
+              </pre>
+              <p className="text-xs text-muted-foreground">
+                Delta vs yesterday is simply{" "}
+                <code className="rounded bg-secondary px-1.5 py-0.5">
+                  todayIndex - yesterdayIndex
+                </code>.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="animate-fade-up">
+            <CardHeader>
+              <CardTitle>Data Sources (Counts)</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="text-sm text-muted-foreground">
+                Sources contributing to the rollup window:
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {Object.entries(today.totals.mentionsBySource ?? {})
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([source, count]) => (
+                    <Badge key={source} variant="outline">
+                      {source}{" "}
+                      <span className="ml-1 text-muted-foreground">
+                        {formatInteger(count)}
+                      </span>
+                    </Badge>
+                  ))}
+              </div>
+
+              {Object.keys(today.totals.mentionsBySubreddit ?? {}).length ? (
+                <>
+                  <Separator className="my-2" />
+                  <div className="text-xs text-muted-foreground">
+                    Reddit subreddits (top):
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {Object.entries(today.totals.mentionsBySubreddit ?? {})
+                      .sort((a, b) => b[1] - a[1])
+                      .slice(0, 8)
+                      .map(([sr, count]) => (
+                        <Badge key={sr} variant="outline">
+                          r/{sr}{" "}
+                          <span className="ml-1 text-muted-foreground">
+                            {formatInteger(count)}
+                          </span>
+                        </Badge>
+                      ))}
+                  </div>
+                </>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Note: subreddit breakdown appears when Reddit metadata is
+                  available.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="animate-fade-up">
+            <CardHeader>
+              <CardTitle>Competitive Coverage</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm text-muted-foreground">
+              <p>
+                Competitive comparisons (share-of-voice + sentiment) use the{" "}
+                <b>same 24h window</b> and <b>same enabled sources</b> across all
+                brands.
+              </p>
+              <p>
+                For Reddit, make sure you include <b>competitor forums</b> (not just
+                Wyze) when you enable subreddit scanning, otherwise conclusions may
+                be biased.
+              </p>
+              <p className="text-xs">
+                Tip: set{" "}
+                <code className="rounded bg-secondary px-1.5 py-0.5">
+                  REDDIT_SUBREDDITS
+                </code>{" "}
+                to include Wyze + Ring + Arlo + Eufy + Nest/GoogleHome + Blink + Reolink
+                forums.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <SectionHeading
           title="Example Mentions"
           subtitle="A capped set of enriched mentions (up to 200) for quick drill-down."
           right={

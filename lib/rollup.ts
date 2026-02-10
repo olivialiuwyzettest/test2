@@ -39,6 +39,12 @@ function brandKey(brand: string) {
   return known ?? brand;
 }
 
+function getSubredditFromMeta(meta: unknown): string | null {
+  if (!meta || typeof meta !== "object") return null;
+  const v = (meta as Record<string, unknown>).subreddit;
+  return typeof v === "string" && v.trim() ? v.trim() : null;
+}
+
 function topicCounts(mentions: EnrichedMention[]) {
   const counts = new Map<string, number>();
   for (const m of mentions) {
@@ -199,6 +205,8 @@ export function computeDailyRollup(args: {
   const generatedAt = now.toISOString();
 
   const mentionsByBrand: Record<string, number> = {};
+  const mentionsBySource: Record<string, number> = {};
+  const mentionsBySubreddit: Record<string, number> = {};
   const scoresByBrand: Record<string, number[]> = {};
   const distByBrand: Record<string, SentimentDistribution> = {};
 
@@ -218,6 +226,11 @@ export function computeDailyRollup(args: {
       continue;
     }
     mentionsByBrand[b] += 1;
+    mentionsBySource[m.source] = (mentionsBySource[m.source] ?? 0) + 1;
+    const subreddit = getSubredditFromMeta(m.rawMeta as unknown);
+    if (subreddit) {
+      mentionsBySubreddit[subreddit] = (mentionsBySubreddit[subreddit] ?? 0) + 1;
+    }
     allScores.push(m.sentimentScore);
     scoresByBrand[b].push(m.sentimentScore);
     addDist(overallDist, m.sentimentLabel);
@@ -325,6 +338,8 @@ export function computeDailyRollup(args: {
     totals: {
       mentions: totalMentions,
       mentionsByBrand,
+      mentionsBySource,
+      mentionsBySubreddit,
     },
     sentimentAvg: {
       overall: clamp(overallAvg, -1, 1),

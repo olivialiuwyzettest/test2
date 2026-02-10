@@ -3,6 +3,8 @@
 Daily sentiment + competitive landscape dashboard for Wyze vs competitors.
 
 - Single page dashboard: `/`
+- Methodology: `/methodology`
+- TV mode: `/tv`
 - Static data files under `public/data/` (committed + refreshed by GitHub Actions)
 - Pluggable connectors (`sample` required; `rss` + `reddit` optional/opt-in)
 
@@ -38,6 +40,8 @@ Notes:
 - `DATA_CONNECTORS` defaults to `sample`.
 - If you enable `rss` or `reddit`, `OPENAI_API_KEY` is required.
 - RSS/Reddit connectors are opt-in and use official/public APIs (no brittle scraping by default).
+- Coverage note: if you restrict ingestion to only one brand community (e.g., only Wyze),
+  competitor comparisons will be biased. Include competitor sources too.
 
 ## Deployment (Vercel)
 

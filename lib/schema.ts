@@ -83,6 +83,9 @@ export const DailyRollupSchema = z.object({
   totals: z.object({
     mentions: z.number().int().nonnegative(),
     mentionsByBrand: z.record(z.number().int().nonnegative()),
+    mentionsBySource: z.record(z.number().int().nonnegative()).default({}),
+    // Only populated when a connector provides subreddit metadata (e.g., Reddit).
+    mentionsBySubreddit: z.record(z.number().int().nonnegative()).default({}),
   }),
   sentimentAvg: z.object({
     overall: z.number().min(-1).max(1),
