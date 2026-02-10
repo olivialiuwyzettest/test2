@@ -80,21 +80,49 @@
   var BASE_W = 1920;
   var BASE_H = 1080;
   var SCALE_PAD = 0.99;
+  var SAFE_PX = 8; // guard for rounding + burn-in shift (total margin)
+
+  function fitViewportBox() {
+    var fit = qs(".tv-fit");
+    if (!fit || !fit.getBoundingClientRect) return null;
+    var rect = fit.getBoundingClientRect();
+    if (!rect || !rect.width || !rect.height) return null;
+
+    try {
+      if (window.getComputedStyle) {
+        var st = window.getComputedStyle(fit);
+        var pl = parseFloat(st.paddingLeft || "0") || 0;
+        var pr = parseFloat(st.paddingRight || "0") || 0;
+        var pt = parseFloat(st.paddingTop || "0") || 0;
+        var pb = parseFloat(st.paddingBottom || "0") || 0;
+        return { w: rect.width - pl - pr, h: rect.height - pt - pb };
+      }
+    } catch (e) {}
+
+    return { w: rect.width, h: rect.height };
+  }
 
   function updateScale() {
     var override = Number(getQueryParam("scale") || "");
+    var box = fitViewportBox();
     var vv = window.visualViewport;
     var w =
+      (box && box.w) ||
       (vv && vv.width) ||
       document.documentElement.clientWidth ||
       window.innerWidth ||
       BASE_W;
     var h =
+      (box && box.h) ||
       (vv && vv.height) ||
       document.documentElement.clientHeight ||
       window.innerHeight ||
       BASE_H;
-    var scale = Math.min(w / BASE_W, h / BASE_H) * SCALE_PAD;
+
+    // If we're scaling down, keep a tiny margin to avoid 1px cutoffs on some browsers.
+    var safeW = w < BASE_W ? Math.max(1, w - SAFE_PX) : w;
+    var safeH = h < BASE_H ? Math.max(1, h - SAFE_PX) : h;
+    var scale = Math.min(safeW / BASE_W, safeH / BASE_H) * SCALE_PAD;
 
     if (isFiniteNumber(override) && override > 0.3 && override < 3) {
       scale = override;
