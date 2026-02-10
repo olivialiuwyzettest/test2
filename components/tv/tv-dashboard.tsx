@@ -170,6 +170,10 @@ export function TVDashboard(props: {
 
   const alert = today.alerts.negativeSpike || today.alerts.mentionSpike;
   const lastUpdated = formatTimestamp(latest.generatedAt, latest.timezone);
+  const sourcesSummary = Object.entries(today.totals.mentionsBySource ?? {})
+    .sort((a, b) => b[1] - a[1])
+    .map(([source, count]) => `${source} ${formatInteger(count)}`)
+    .join(" • ");
 
   const topDrivers = useMemo(() => {
     return {
@@ -203,6 +207,13 @@ export function TVDashboard(props: {
             <span className="text-foreground">
               Now: {formatNow(now, latest.timezone)}
             </span>
+            {sourcesSummary ? (
+              <>
+                {" "}
+                <span className="text-muted-foreground/60">|</span>{" "}
+                <span className="text-foreground">Sources: {sourcesSummary}</span>
+              </>
+            ) : null}
           </p>
           {alert && today.alerts.reasons.length ? (
             <p className="mt-2 text-sm text-red-600 dark:text-red-300">
@@ -455,4 +466,3 @@ export function TVDashboard(props: {
     </main>
   );
 }
-

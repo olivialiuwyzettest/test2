@@ -66,6 +66,10 @@ export default async function HomePage() {
   const alertLabel = alert ? "Alert" : "Stable";
 
   const lastUpdated = formatTimestamp(latest.generatedAt, latest.timezone);
+  const sourcesSummary = Object.entries(today.totals.mentionsBySource ?? {})
+    .sort((a, b) => b[1] - a[1])
+    .map(([source, count]) => `${source} ${formatInteger(count)}`)
+    .join(" • ");
 
   return (
     <main className="container pb-14 pt-8">
@@ -81,6 +85,11 @@ export default async function HomePage() {
             Last updated: <span className="text-foreground">{lastUpdated}</span>{" "}
             <span className="text-muted-foreground">({latest.timezone})</span>
           </p>
+          {sourcesSummary ? (
+            <p className="mt-1 text-xs text-muted-foreground">
+              Sources: <span className="text-foreground">{sourcesSummary}</span>
+            </p>
+          ) : null}
         </div>
         <div className="flex items-center gap-2">
           <Button asChild variant="ghost" size="sm">
