@@ -261,6 +261,17 @@ def _build_tv_context(request: Request, db: Session, settings: Settings) -> dict
         "last_refresh_pt": _fmt_pt(last_refresh_dt),
         "last_refresh_ago": _fmt_age(last_refresh_dt, now=now) if last_refresh_dt else "",
     }
+    # Cache-bust static assets so kiosk/TV browsers pick up deploy changes without manual hard-refresh.
+    try:
+        static_dir = BASE_DIR / "static"
+        mtimes: list[float] = []
+        for name in ("theme.css", "tv.css", "dashboard.js", "tv.js"):
+            p = static_dir / name
+            if p.exists():
+                mtimes.append(p.stat().st_mtime)
+        header["assets_version"] = str(int(max(mtimes) if mtimes else now.timestamp()))
+    except Exception:
+        header["assets_version"] = str(int(now.timestamp()))
 
     banner = None
     if last_run and last_run.status == "failed":

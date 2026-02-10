@@ -35,6 +35,12 @@ Controls (query params):
 - `rotate`: page rotation interval seconds (default from `TV_ROTATION_SECONDS`)
 - `ticker`: ticker rotation seconds (default from `TV_TICKER_SECONDS`)
 - `scale`: manual scale override (example: `/tv?scale=0.9`)
+- `pause`: disable pause-on-interaction (example: `/tv?pause=0`)
+
+Notes:
+
+- TV mode is designed on a 1920x1080 baseline and automatically scales to fit the visible browser viewport (no scrolling).
+- Burn-in prevention shifts the *background* subtly (not the layout) to avoid edge clipping.
 
 ## Theme Tokens
 

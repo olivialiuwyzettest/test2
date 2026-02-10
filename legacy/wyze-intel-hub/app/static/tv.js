@@ -73,24 +73,32 @@
     };
   }
 
+  function raf(fn) {
+    if (window.requestAnimationFrame) return window.requestAnimationFrame(fn);
+    return window.setTimeout(fn, 16);
+  }
+
   var body = document.body;
   if (!body || !body.classList.contains("mode-tv")) return;
 
   // Fit-to-screen scaling. Designed on a 1920x1080 baseline.
   var BASE_W = 1920;
   var BASE_H = 1080;
-  var SCALE_PAD = 0.99;
-  var SAFE_PX = 8; // guard for rounding + burn-in shift (total margin)
+  // Leave a small safety margin so we never clip due to rounding/font metrics.
+  var FIT_MARGIN_PX = 6; // per-edge
+  var FIT_MAX_ITERS = 3;
+
+  var fitEl = qs(".tv-fit");
+  var rootEl = qs(".tv-root");
 
   function fitViewportBox() {
-    var fit = qs(".tv-fit");
-    if (!fit || !fit.getBoundingClientRect) return null;
-    var rect = fit.getBoundingClientRect();
+    if (!fitEl || !fitEl.getBoundingClientRect) return null;
+    var rect = fitEl.getBoundingClientRect();
     if (!rect || !rect.width || !rect.height) return null;
 
     try {
       if (window.getComputedStyle) {
-        var st = window.getComputedStyle(fit);
+        var st = window.getComputedStyle(fitEl);
         var pl = parseFloat(st.paddingLeft || "0") || 0;
         var pr = parseFloat(st.paddingRight || "0") || 0;
         var pt = parseFloat(st.paddingTop || "0") || 0;
@@ -103,6 +111,10 @@
   }
 
   function updateScale() {
+    if (!fitEl || !rootEl) return;
+    fitRunId += 1;
+    var runId = fitRunId;
+
     var override = Number(getQueryParam("scale") || "");
     var box = fitViewportBox();
     var vv = window.visualViewport;
@@ -119,10 +131,9 @@
       window.innerHeight ||
       BASE_H;
 
-    // If we're scaling down, keep a tiny margin to avoid 1px cutoffs on some browsers.
-    var safeW = w < BASE_W ? Math.max(1, w - SAFE_PX) : w;
-    var safeH = h < BASE_H ? Math.max(1, h - SAFE_PX) : h;
-    var scale = Math.min(safeW / BASE_W, safeH / BASE_H) * SCALE_PAD;
+    var availW = Math.max(1, w - FIT_MARGIN_PX * 2);
+    var availH = Math.max(1, h - FIT_MARGIN_PX * 2);
+    var scale = Math.min(availW / BASE_W, availH / BASE_H);
 
     if (isFiniteNumber(override) && override > 0.3 && override < 3) {
       scale = override;
@@ -131,11 +142,76 @@
       scale = 1;
     }
     scale = Math.max(0.25, Math.min(scale, 3));
-    document.documentElement.style.setProperty("--tv-scale", scale.toFixed(4));
+
+    // Apply + verify fit after paint. Some browsers may shift metrics after fonts load.
+    function step(nextScale, iter) {
+      if (runId !== fitRunId) return;
+      if (!isFiniteNumber(nextScale) || nextScale <= 0) nextScale = 1;
+      nextScale = Math.max(0.25, Math.min(nextScale, 3));
+
+      rootEl.classList.add("is-fitting");
+      document.documentElement.style.setProperty(
+        "--tv-scale",
+        Number(nextScale).toFixed(4)
+      );
+
+      raf(function () {
+        if (runId !== fitRunId) return;
+
+        var fitRect = fitEl.getBoundingClientRect();
+        var rootRect = rootEl.getBoundingClientRect();
+        if (!fitRect || !rootRect || !fitRect.width || !fitRect.height) {
+          rootEl.classList.remove("is-fitting");
+          return;
+        }
+
+        // Keep within fit rect with a small margin.
+        var leftOk = rootRect.left >= fitRect.left + FIT_MARGIN_PX - 0.5;
+        var topOk = rootRect.top >= fitRect.top + FIT_MARGIN_PX - 0.5;
+        var rightOk = rootRect.right <= fitRect.right - FIT_MARGIN_PX + 0.5;
+        var bottomOk = rootRect.bottom <= fitRect.bottom - FIT_MARGIN_PX + 0.5;
+
+        if ((leftOk && topOk && rightOk && bottomOk) || iter >= FIT_MAX_ITERS) {
+          rootEl.classList.remove("is-fitting");
+          return;
+        }
+
+        var fitW = Math.max(1, fitRect.width - FIT_MARGIN_PX * 2);
+        var fitH = Math.max(1, fitRect.height - FIT_MARGIN_PX * 2);
+        var scaleByW = fitW / Math.max(1, rootRect.width);
+        var scaleByH = fitH / Math.max(1, rootRect.height);
+        var scaleBy = Math.min(scaleByW, scaleByH, 0.998);
+
+        if (!isFiniteNumber(scaleBy) || scaleBy >= 1) {
+          rootEl.classList.remove("is-fitting");
+          return;
+        }
+
+        step(nextScale * scaleBy, iter + 1);
+      });
+    }
+
+    step(scale, 0);
   }
 
+  var fitRunId = 0;
   updateScale();
-  window.addEventListener("resize", throttle(updateScale, 200));
+  var onResize = throttle(updateScale, 200);
+  window.addEventListener("resize", onResize);
+  if (window.visualViewport && window.visualViewport.addEventListener) {
+    window.visualViewport.addEventListener("resize", onResize);
+    window.visualViewport.addEventListener("scroll", onResize);
+  }
+  window.addEventListener("load", function () {
+    window.setTimeout(updateScale, 50);
+  });
+  try {
+    if (document.fonts && document.fonts.ready && document.fonts.ready.then) {
+      document.fonts.ready.then(function () {
+        window.setTimeout(updateScale, 50);
+      });
+    }
+  } catch (e) {}
 
   // Kiosk-safe: never navigate away in the same tab.
   document.addEventListener(
@@ -419,8 +495,9 @@
     var magY = 2 + Math.floor(Math.random() * 3);
     var dx = (Math.random() < 0.5 ? -1 : 1) * mag;
     var dy = (Math.random() < 0.5 ? -1 : 1) * magY;
-    document.documentElement.style.setProperty("--burnin-x", dx + "px");
-    document.documentElement.style.setProperty("--burnin-y", dy + "px");
+    // Cycle the background subtly instead of shifting layout, to avoid any edge clipping.
+    document.documentElement.style.setProperty("--burnin-bg-x", dx + "px");
+    document.documentElement.style.setProperty("--burnin-bg-y", dy + "px");
   }
   applyBurnInShift();
   window.setInterval(applyBurnInShift, burninShiftSeconds * 1000);
