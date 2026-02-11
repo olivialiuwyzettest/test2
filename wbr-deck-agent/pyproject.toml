@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wbr-deck-agent"
+version = "0.1.0"
+description = "Local-first internal app that turns Tableau screenshots/PDFs into a minimalist WBR narrative deck."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "fastapi>=0.111.0",
+  "uvicorn[standard]>=0.30.0",
+  "python-multipart>=0.0.9",
+  "pydantic>=2.7.0",
+  "pydantic-settings>=2.3.0",
+  "openai>=1.40.0",
+  "anthropic>=0.30.0",
+  "Pillow>=10.3.0",
+  "PyMuPDF>=1.24.0",
+  "Jinja2>=3.1.4",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.2.0",
+  "httpx>=0.27.0",
+  "ruff>=0.6.0",
+]
+
+[tool.setuptools]
+package-dir = {"" = "backend"}
+
+[tool.setuptools.packages.find]
+where = ["backend"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]

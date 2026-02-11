@@ -1,0 +1,21 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# Local runtime/config
+.env
+
+# Node (downloaded for local dev)
+.dev/
+
+# Local data/artifacts
+data/uploads/
+data/*.sqlite3*
+out/
+tmp/
+
+# Frontend build output
+frontend/dist/
