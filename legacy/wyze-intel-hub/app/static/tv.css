@@ -549,9 +549,9 @@ body.mode-tv {
 
 .tv-brandmark-img {
   position: absolute;
-  inset: 9px;
-  width: calc(100% - 18px);
-  height: calc(100% - 18px);
+  inset: 7px;
+  width: calc(100% - 14px);
+  height: calc(100% - 14px);
   object-fit: contain;
   z-index: 1;
   filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
@@ -561,6 +561,11 @@ body.mode-tv {
 .tv-brandmark-text {
   position: relative;
   z-index: 0;
+  transition: opacity 160ms ease;
+}
+
+.tv-brandmark.has-logo .tv-brandmark-text {
+  opacity: 0;
 }
 
 .tv-row .tv-row-title {

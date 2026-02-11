@@ -114,13 +114,6 @@ _BRAND_MARK_PALETTE: dict[str, tuple[str, str]] = {
 }
 
 _BRAND_LOGO_DOMAINS: dict[str, str] = {
-    # Main competitors
-    "ring": "ring.com",
-    "blink": "blinkforhome.com",
-    "eufy": "eufy.com",
-    "tp-link": "tp-link.com",
-    "reolink": "reolink.com",
-    "arlo": "arlo.com",
     # Emerging set (best-effort)
     "aqara": "aqara.com",
     "simplisafe": "simplisafe.com",
@@ -140,9 +133,24 @@ _BRAND_LOGO_DOMAINS: dict[str, str] = {
     "deep sentinel": "deepsentinel.com",
 }
 
+_BRAND_LOGO_URLS: dict[str, str] = {
+    # Main competitors: prefer each brand's own favicon/icon so the mark is correct.
+    # (Google's favicon service can return incorrect/low-res icons.)
+    "ring": "https://ring.com/favicon.ico",
+    "blink": "https://blinkforhome.com/favicon.ico",
+    "eufy": "https://www.eufy.com/favicon.ico",
+    "tp-link": "https://static.tp-link.com/favicon.ico",
+    "reolink": "https://reolink.com/favicon.ico",
+    # Arlo blocks automated fetches behind a bot challenge; use a stable SVG brand mark.
+    "arlo": "https://cdn.simpleicons.org/arlo",
+}
+
 
 def _brand_logo_url(entity: str) -> str:
     key = (entity or "").strip().lower()
+    direct = _BRAND_LOGO_URLS.get(key, "")
+    if direct:
+        return direct
     domain = _BRAND_LOGO_DOMAINS.get(key, "")
     if not domain:
         return ""
