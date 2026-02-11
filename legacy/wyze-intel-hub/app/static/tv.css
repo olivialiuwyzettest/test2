@@ -349,6 +349,16 @@ body.mode-tv {
   white-space: nowrap;
 }
 
+.tv-ticker-qr {
+  flex: none;
+  width: clamp(52px, 3.2vw, 74px);
+  height: clamp(52px, 3.2vw, 74px);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 8px;
+  border: 1px solid rgba(121, 81, 214, 0.5);
+}
+
 .tv-stage {
   position: relative;
   min-height: 0;

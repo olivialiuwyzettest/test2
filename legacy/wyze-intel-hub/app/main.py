@@ -395,6 +395,7 @@ def _build_tv_context(request: Request, db: Session, settings: Settings) -> dict
                     "topic_key": topic,
                     "topic_label": label,
                     "title": str(it.title or "").strip(),
+                    "url": str(it.url or "").strip(),
                     "source_name": str(it.source_name or "").strip(),
                     "age": _fmt_age(it.published_at, now=now),
                     "published_at": _ensure_utc(it.published_at) if getattr(it, "published_at", None) else now,
@@ -410,7 +411,14 @@ def _build_tv_context(request: Request, db: Session, settings: Settings) -> dict
         add("emerging", "Emerging", get_latest_items(db, topic="emerging", limit=12))
 
         out.sort(key=lambda r: r["published_at"], reverse=True)
-        return out[:32]
+        items = out[:32]
+        for row in items:
+            url = str(row.get("url") or "").strip()
+            if url.startswith("http"):
+                row["qr"] = _qr_svg_data_uri(url)
+            else:
+                row["qr"] = ""
+        return items
 
     ticker_items = feed_items()
 
