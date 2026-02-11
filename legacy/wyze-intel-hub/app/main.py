@@ -136,11 +136,12 @@ _BRAND_LOGO_DOMAINS: dict[str, str] = {
 _BRAND_LOGO_URLS: dict[str, str] = {
     # Main competitors: prefer each brand's own favicon/icon so the mark is correct.
     # (Google's favicon service can return incorrect/low-res icons.)
-    "ring": "https://ring.com/favicon.ico",
-    "blink": "https://blinkforhome.com/favicon.ico",
-    "eufy": "https://www.eufy.com/favicon.ico",
-    "tp-link": "https://static.tp-link.com/favicon.ico",
-    "reolink": "https://reolink.com/favicon.ico",
+    # Use transparent logo/wordmark assets (favicons often have colored square backgrounds).
+    "ring": "https://site-nav.ring.com/media/ring-logo.svg",
+    "blink": "https://images.squarespace-cdn.com/content/v1/5e21c06a08d2fc435f20e6c5/e8940f8a-39e3-426f-8d16-54f9346286a7/blink_logo_web.png?format=300w",
+    "eufy": "https://cdn.shopify.com/s/files/1/0521/9411/5753/files/Frame_24725_3840x.png?v=1657005628",
+    "tp-link": "https://static.tp-link.com/upload/menu/tp-link_20231205034128d.png",
+    "reolink": "https://home-cdn.reolink.us/wp-content/assets/header-svg-blue.svg",
     # Arlo blocks automated fetches behind a bot challenge; use a stable SVG brand mark.
     "arlo": "https://cdn.simpleicons.org/arlo",
 }
@@ -490,11 +491,17 @@ def _build_tv_context(request: Request, db: Session, settings: Settings) -> dict
         )
 
     # QR codes point to the non-TV dashboards for click-free exploration.
+    qr_targets = {
+        "wyze": _abs_url(request, "/dashboards/wyze"),
+        "sentiment": _abs_url(request, "/dashboards/sentiment"),
+        "competitors": _abs_url(request, "/dashboards/competitors"),
+        "emerging": _abs_url(request, "/dashboards/emerging"),
+    }
     qrs = {
-        "wyze": _qr_svg_data_uri(_abs_url(request, "/dashboards/wyze")),
-        "sentiment": _qr_svg_data_uri(_abs_url(request, "/dashboards/sentiment")),
-        "competitors": _qr_svg_data_uri(_abs_url(request, "/dashboards/competitors")),
-        "emerging": _qr_svg_data_uri(_abs_url(request, "/dashboards/emerging")),
+        "wyze": _qr_svg_data_uri(qr_targets["wyze"]),
+        "sentiment": _qr_svg_data_uri(qr_targets["sentiment"]),
+        "competitors": _qr_svg_data_uri(qr_targets["competitors"]),
+        "emerging": _qr_svg_data_uri(qr_targets["emerging"]),
     }
 
     return {
@@ -512,6 +519,7 @@ def _build_tv_context(request: Request, db: Session, settings: Settings) -> dict
         "ticker_items": ticker_items,
         "sparks": sparks,
         "qrs": qrs,
+        "qr_targets": qr_targets,
         "tv_wyze_signals": tv_wyze_signals,
         "tv_sentiment_negative": tv_sentiment_negative,
         "tv_sentiment_positive": tv_sentiment_positive,

@@ -55,7 +55,13 @@
           </div>
           <div class="tv-ticker-stage">
             {% for item in ticker_items %}
-            <div class="tv-ticker-item {% if loop.index0 == 0 %}is-active{% endif %}" data-tv-feed-item>
+            <a
+              class="tv-ticker-item {% if loop.index0 == 0 %}is-active{% endif %}"
+              data-tv-feed-item
+              href="{{ item.url }}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <span class="tv-pill is-accent">{{ item.topic_label }}</span>
               {% if item.entity_display %}
               <span class="tv-pill">{{ item.entity_display }}</span>
@@ -65,7 +71,7 @@
               {% if item.qr %}
               <img class="tv-ticker-qr" src="{{ item.qr }}" alt="QR code: open item" />
               {% endif %}
-            </div>
+            </a>
             {% else %}
             <div class="tv-ticker-item is-active" data-tv-feed-item>
               <span class="tv-ticker-text">No recent items yet.</span>
@@ -90,13 +96,17 @@
                   <div class="tv-panel-sub">Most recent + most relevant</div>
                 </div>
                 {% if qrs.wyze %}
-                <img class="tv-qr" src="{{ qrs.wyze }}" alt="QR code: Wyze details" />
+                <a class="tv-qr-link" href="{{ qr_targets.wyze }}" target="_blank" rel="noopener noreferrer"
+                  ><img class="tv-qr" src="{{ qrs.wyze }}" alt="QR code: Wyze details"
+                /></a>
                 {% endif %}
               </div>
               <div class="tv-list" role="list">
                 {% for item in tv_wyze_signals %}
                 <div class="tv-item" role="listitem">
-                  <div class="tv-item-title">{{ item.title }}</div>
+                  <a class="tv-item-title tv-item-link" href="{{ item.url }}" target="_blank" rel="noopener noreferrer"
+                    >{{ item.title }}</a
+                  >
                   <div class="tv-item-meta">
                     <span class="tv-pill">{{ item.source_name }}</span>
                     <span class="tv-pill">{{ item.age }}</span>
@@ -120,13 +130,17 @@
                   <div class="tv-panel-sub">High-engagement public forums (30d scan)</div>
                 </div>
                 {% if qrs.sentiment %}
-                <img class="tv-qr" src="{{ qrs.sentiment }}" alt="QR code: Sentiment details" />
+                <a class="tv-qr-link" href="{{ qr_targets.sentiment }}" target="_blank" rel="noopener noreferrer"
+                  ><img class="tv-qr" src="{{ qrs.sentiment }}" alt="QR code: Sentiment details"
+                /></a>
                 {% endif %}
               </div>
               <div class="tv-list" role="list">
                 {% for item in tv_sentiment_negative %}
                 <div class="tv-item" role="listitem">
-                  <div class="tv-item-title">{{ item.title }}</div>
+                  <a class="tv-item-title tv-item-link" href="{{ item.url }}" target="_blank" rel="noopener noreferrer"
+                    >{{ item.title }}</a
+                  >
                   <div class="tv-item-meta">
                     <span class="tv-pill">{{ item.source_name }}</span>
                     <span class="tv-pill">{{ item.age }}</span>
@@ -148,7 +162,9 @@
                   <div class="tv-panel-sub">24h spikes vs prior 24h</div>
                 </div>
                 {% if qrs.competitors %}
-                <img class="tv-qr" src="{{ qrs.competitors }}" alt="QR code: Competitor details" />
+                <a class="tv-qr-link" href="{{ qr_targets.competitors }}" target="_blank" rel="noopener noreferrer"
+                  ><img class="tv-qr" src="{{ qrs.competitors }}" alt="QR code: Competitor details"
+                /></a>
                 {% endif %}
               </div>
 
@@ -240,7 +256,9 @@
                   <div class="tv-panel-sub">High-engagement posts only</div>
                 </div>
                 {% if qrs.sentiment %}
-                <img class="tv-qr" src="{{ qrs.sentiment }}" alt="QR code: Sentiment details" />
+                <a class="tv-qr-link" href="{{ qr_targets.sentiment }}" target="_blank" rel="noopener noreferrer"
+                  ><img class="tv-qr" src="{{ qrs.sentiment }}" alt="QR code: Sentiment details"
+                /></a>
                 {% endif %}
               </div>
 
@@ -287,22 +305,26 @@
             <article class="tv-panel">
               <div class="tv-panel-head">
                 <div>
-                  <h2 class="tv-panel-title">Top Negative (30d)</h2>
-                  <div class="tv-panel-sub">Highest engagement</div>
-                </div>
-                {% if qrs.sentiment %}
-                <img class="tv-qr" src="{{ qrs.sentiment }}" alt="QR code: Sentiment details" />
-                {% endif %}
-              </div>
-              <div class="tv-list" role="list">
-                {% for item in tv_sentiment_negative %}
-                <div class="tv-item" role="listitem">
-                  <div class="tv-item-title">{{ item.title }}</div>
-                <div class="tv-item-meta">
-                  <span class="tv-pill">{{ item.source_name }}</span>
-                  <span class="tv-pill">{{ item.age }}</span>
-                  <span class="tv-pill is-negative">eng {{ item.engagement_score }}</span>
-                </div>
+	                  <h2 class="tv-panel-title">Top Negative (30d)</h2>
+	                  <div class="tv-panel-sub">Highest engagement</div>
+	                </div>
+	                {% if qrs.sentiment %}
+	                <a class="tv-qr-link" href="{{ qr_targets.sentiment }}" target="_blank" rel="noopener noreferrer"
+	                  ><img class="tv-qr" src="{{ qrs.sentiment }}" alt="QR code: Sentiment details"
+	                /></a>
+	                {% endif %}
+	              </div>
+	              <div class="tv-list" role="list">
+	                {% for item in tv_sentiment_negative %}
+	                <div class="tv-item" role="listitem">
+	                  <a class="tv-item-title tv-item-link" href="{{ item.url }}" target="_blank" rel="noopener noreferrer"
+	                    >{{ item.title }}</a
+	                  >
+	                <div class="tv-item-meta">
+	                  <span class="tv-pill">{{ item.source_name }}</span>
+	                  <span class="tv-pill">{{ item.age }}</span>
+	                  <span class="tv-pill is-negative">eng {{ item.engagement_score }}</span>
+	                </div>
               </div>
               {% else %}
               <div class="tv-item">
@@ -315,22 +337,26 @@
           <article class="tv-panel">
             <div class="tv-panel-head">
               <div>
-                <h2 class="tv-panel-title">Top Positive (30d)</h2>
-                <div class="tv-panel-sub">Highest engagement</div>
-              </div>
-              {% if qrs.sentiment %}
-              <img class="tv-qr" src="{{ qrs.sentiment }}" alt="QR code: Sentiment details" />
-              {% endif %}
-            </div>
-            <div class="tv-list" role="list">
-              {% for item in tv_sentiment_positive %}
-              <div class="tv-item" role="listitem">
-                <div class="tv-item-title">{{ item.title }}</div>
-                <div class="tv-item-meta">
-                  <span class="tv-pill">{{ item.source_name }}</span>
-                  <span class="tv-pill">{{ item.age }}</span>
-                  <span class="tv-pill is-positive">eng {{ item.engagement_score }}</span>
-                </div>
+	                <h2 class="tv-panel-title">Top Positive (30d)</h2>
+	                <div class="tv-panel-sub">Highest engagement</div>
+	              </div>
+	              {% if qrs.sentiment %}
+	              <a class="tv-qr-link" href="{{ qr_targets.sentiment }}" target="_blank" rel="noopener noreferrer"
+	                ><img class="tv-qr" src="{{ qrs.sentiment }}" alt="QR code: Sentiment details"
+	              /></a>
+	              {% endif %}
+	            </div>
+	            <div class="tv-list" role="list">
+	              {% for item in tv_sentiment_positive %}
+	              <div class="tv-item" role="listitem">
+	                <a class="tv-item-title tv-item-link" href="{{ item.url }}" target="_blank" rel="noopener noreferrer"
+	                  >{{ item.title }}</a
+	                >
+	                <div class="tv-item-meta">
+	                  <span class="tv-pill">{{ item.source_name }}</span>
+	                  <span class="tv-pill">{{ item.age }}</span>
+	                  <span class="tv-pill is-positive">eng {{ item.engagement_score }}</span>
+	                </div>
               </div>
               {% else %}
               <div class="tv-item">
@@ -345,13 +371,15 @@
           <article class="tv-panel">
             <div class="tv-panel-head">
               <div>
-                <h2 class="tv-panel-title">Competitor Spikes (24h)</h2>
-                <div class="tv-panel-sub">vs prior 24h</div>
-              </div>
-              {% if qrs.competitors %}
-              <img class="tv-qr" src="{{ qrs.competitors }}" alt="QR code: Competitor details" />
-              {% endif %}
-            </div>
+	                <h2 class="tv-panel-title">Competitor Spikes (24h)</h2>
+	                <div class="tv-panel-sub">vs prior 24h</div>
+	              </div>
+	              {% if qrs.competitors %}
+	              <a class="tv-qr-link" href="{{ qr_targets.competitors }}" target="_blank" rel="noopener noreferrer"
+	                ><img class="tv-qr" src="{{ qrs.competitors }}" alt="QR code: Competitor details"
+	              /></a>
+	              {% endif %}
+	            </div>
             <div class="tv-minirows" role="list">
               {% for row in tv_competitor_spikes[:6] %}
               <div class="tv-row" role="listitem">
@@ -380,7 +408,9 @@
 	                <div class="tv-panel-sub">volume + sentiment</div>
 	              </div>
 	              {% if qrs.competitors %}
-	              <img class="tv-qr" src="{{ qrs.competitors }}" alt="QR code: Competitor details" />
+	              <a class="tv-qr-link" href="{{ qr_targets.competitors }}" target="_blank" rel="noopener noreferrer"
+	                ><img class="tv-qr" src="{{ qrs.competitors }}" alt="QR code: Competitor details"
+	              /></a>
 	              {% endif %}
 	            </div>
 	            <div class="tv-minirows" role="list">
@@ -411,18 +441,22 @@
 	                <div class="tv-panel-sub">news + public forums</div>
 	              </div>
 	              {% if qrs.competitors %}
-	              <img class="tv-qr" src="{{ qrs.competitors }}" alt="QR code: Competitor details" />
+	              <a class="tv-qr-link" href="{{ qr_targets.competitors }}" target="_blank" rel="noopener noreferrer"
+	                ><img class="tv-qr" src="{{ qrs.competitors }}" alt="QR code: Competitor details"
+	              /></a>
 	              {% endif %}
 	            </div>
 	            <div class="tv-list" role="list">
 	              {% for item in tv_competitor_latest %}
 	              <div class="tv-item" role="listitem">
-	                <div class="tv-item-title">{{ item.title }}</div>
-                <div class="tv-item-meta">
-                  <span class="tv-pill">{{ item.entity_display }}</span>
-                  <span class="tv-pill">{{ item.source_name }}</span>
-                  <span class="tv-pill">{{ item.age }}</span>
-                </div>
+	                <a class="tv-item-title tv-item-link" href="{{ item.url }}" target="_blank" rel="noopener noreferrer"
+	                  >{{ item.title }}</a
+	                >
+	                <div class="tv-item-meta">
+	                  <span class="tv-pill">{{ item.entity_display }}</span>
+	                  <span class="tv-pill">{{ item.source_name }}</span>
+	                  <span class="tv-pill">{{ item.age }}</span>
+	                </div>
               </div>
               {% else %}
               <div class="tv-item">
@@ -437,13 +471,15 @@
           <article class="tv-panel">
             <div class="tv-panel-head">
               <div>
-                <h2 class="tv-panel-title">Emerging Spikes (24h)</h2>
-                <div class="tv-panel-sub">vs prior 24h</div>
-              </div>
-              {% if qrs.emerging %}
-              <img class="tv-qr" src="{{ qrs.emerging }}" alt="QR code: Emerging details" />
-              {% endif %}
-            </div>
+	                <h2 class="tv-panel-title">Emerging Spikes (24h)</h2>
+	                <div class="tv-panel-sub">vs prior 24h</div>
+	              </div>
+	              {% if qrs.emerging %}
+	              <a class="tv-qr-link" href="{{ qr_targets.emerging }}" target="_blank" rel="noopener noreferrer"
+	                ><img class="tv-qr" src="{{ qrs.emerging }}" alt="QR code: Emerging details"
+	              /></a>
+	              {% endif %}
+	            </div>
             <div class="tv-minirows" role="list">
               {% for row in tv_emerging_spikes[:6] %}
               <div class="tv-row" role="listitem">
@@ -468,13 +504,15 @@
           <article class="tv-panel">
             <div class="tv-panel-head">
               <div>
-                <h2 class="tv-panel-title">Leaderboard (14d)</h2>
-                <div class="tv-panel-sub">mentions + max relevance</div>
-              </div>
-              {% if qrs.emerging %}
-              <img class="tv-qr" src="{{ qrs.emerging }}" alt="QR code: Emerging details" />
-              {% endif %}
-            </div>
+	                <h2 class="tv-panel-title">Leaderboard (14d)</h2>
+	                <div class="tv-panel-sub">mentions + max relevance</div>
+	              </div>
+	              {% if qrs.emerging %}
+	              <a class="tv-qr-link" href="{{ qr_targets.emerging }}" target="_blank" rel="noopener noreferrer"
+	                ><img class="tv-qr" src="{{ qrs.emerging }}" alt="QR code: Emerging details"
+	              /></a>
+	              {% endif %}
+	            </div>
             <div class="tv-minirows" role="list">
               {% for row in emerging_rollup[:6] %}
               <div class="tv-row" role="listitem">
@@ -503,18 +541,22 @@
 	                <div class="tv-panel-sub">newest + highest relevance</div>
 	              </div>
 	              {% if qrs.emerging %}
-	              <img class="tv-qr" src="{{ qrs.emerging }}" alt="QR code: Emerging details" />
+	              <a class="tv-qr-link" href="{{ qr_targets.emerging }}" target="_blank" rel="noopener noreferrer"
+	                ><img class="tv-qr" src="{{ qrs.emerging }}" alt="QR code: Emerging details"
+	              /></a>
 	              {% endif %}
 	            </div>
 	            <div class="tv-list" role="list">
 	              {% for item in tv_emerging_latest %}
 	              <div class="tv-item" role="listitem">
-	                <div class="tv-item-title">{{ item.title }}</div>
-                <div class="tv-item-meta">
-                  <span class="tv-pill">{{ item.entity_display }}</span>
-                  <span class="tv-pill">{{ item.source_name }}</span>
-                  <span class="tv-pill">{{ item.age }}</span>
-                </div>
+	                <a class="tv-item-title tv-item-link" href="{{ item.url }}" target="_blank" rel="noopener noreferrer"
+	                  >{{ item.title }}</a
+	                >
+	                <div class="tv-item-meta">
+	                  <span class="tv-pill">{{ item.entity_display }}</span>
+	                  <span class="tv-pill">{{ item.source_name }}</span>
+	                  <span class="tv-pill">{{ item.age }}</span>
+	                </div>
               </div>
               {% else %}
               <div class="tv-item">

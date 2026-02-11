@@ -321,6 +321,8 @@ body.mode-tv {
   opacity: 0;
   transform: translate3d(0, 8px, 0);
   transition: opacity 260ms ease, transform 360ms ease;
+  color: inherit;
+  text-decoration: none;
 }
 
 .tv-ticker-item.is-active {
@@ -502,6 +504,22 @@ body.mode-tv {
   background: rgba(245, 158, 11, 0.1);
 }
 
+.tv-item-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.tv-item-link:focus-visible,
+.tv-qr-link:focus-visible {
+  outline: 3px solid rgba(121, 81, 214, 0.65);
+  outline-offset: 5px;
+  border-radius: 16px;
+}
+
+.tv-qr-link {
+  display: inline-flex;
+}
+
 .tv-split {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -539,7 +557,7 @@ body.mode-tv {
 .tv-brandmark {
   --bm1: rgba(121, 81, 214, 0.7);
   --bm2: rgba(121, 81, 214, 0.38);
-  width: clamp(44px, 3.2vw, 54px);
+  width: clamp(72px, 5.6vw, 124px);
   height: clamp(44px, 3.2vw, 54px);
   border-radius: 16px;
   background: linear-gradient(180deg, var(--bm1), var(--bm2));
@@ -555,6 +573,12 @@ body.mode-tv {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   flex: none;
+}
+
+.tv-brandmark.has-logo {
+  /* Give real logos a neutral surface so they read consistently. */
+  background: rgba(244, 242, 255, 0.92);
+  border-color: rgba(121, 81, 214, 0.35);
 }
 
 .tv-brandmark-img {
