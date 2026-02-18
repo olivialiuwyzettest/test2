@@ -19,6 +19,7 @@ const schema = z.object({
   brivoApiKey: z.string().optional(),
   brivoClientId: z.string().optional(),
   brivoClientSecret: z.string().optional(),
+  brivoRefreshToken: z.string().optional(),
   brivoUsername: z.string().optional(),
   brivoPassword: z.string().optional(),
   brivoWebhookMode: z
@@ -48,6 +49,7 @@ const parsed = schema.parse({
   brivoApiKey: process.env.BRIVO_API_KEY,
   brivoClientId: process.env.BRIVO_CLIENT_ID,
   brivoClientSecret: process.env.BRIVO_CLIENT_SECRET,
+  brivoRefreshToken: process.env.BRIVO_REFRESH_TOKEN,
   brivoUsername: process.env.BRIVO_USERNAME,
   brivoPassword: process.env.BRIVO_PASSWORD,
   brivoWebhookMode: process.env.BRIVO_WEBHOOK_MODE,

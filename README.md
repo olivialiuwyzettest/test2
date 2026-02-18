@@ -161,6 +161,7 @@ Set:
 - `BRIVO_API_KEY`
 - `BRIVO_CLIENT_ID`
 - `BRIVO_CLIENT_SECRET`
+- Optional: `BRIVO_REFRESH_TOKEN` for refresh-token grant
 - Optional: `BRIVO_USERNAME` and `BRIVO_PASSWORD` for password grant
 
 Adapter supports endpoints:

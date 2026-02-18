@@ -134,34 +134,46 @@ export class BrivoLiveAdapter implements BrivoAdapter {
     const basicAuth = Buffer.from(`${env.brivoClientId}:${env.brivoClientSecret}`).toString("base64");
     const params = new URLSearchParams();
 
-    // MVP: support password grant for server-to-server Brivo setups.
-    if (env.brivoUsername && env.brivoPassword) {
+    if (env.brivoRefreshToken) {
+      params.set("grant_type", "refresh_token");
+      params.set("refresh_token", env.brivoRefreshToken);
+    } else if (env.brivoUsername && env.brivoPassword) {
+      // Password grant for server-to-server Brivo setups.
       params.set("grant_type", "password");
       params.set("username", env.brivoUsername);
       params.set("password", env.brivoPassword);
     } else {
-      // TODO: confirm tenant setup supports client_credentials when no service user is required.
+      // Fallback for tenants that support client credentials.
       params.set("grant_type", "client_credentials");
+    }
+
+    const tokenHeaders: Record<string, string> = {
+      Authorization: `Basic ${basicAuth}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    };
+    if (env.brivoApiKey) {
+      tokenHeaders[env.brivoApiKeyHeader] = env.brivoApiKey;
     }
 
     let response = await fetch(env.brivoAuthUrl, {
       method: "POST",
-      headers: {
-        Authorization: `Basic ${basicAuth}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
+      headers: tokenHeaders,
       body: params.toString(),
     });
 
     if (!response.ok) {
       // Some Brivo tenant configs require query-style token requests.
       const queryStyleUrl = `${env.brivoAuthUrl}?${params.toString()}`;
+      const queryHeaders: Record<string, string> = {
+        Authorization: `Basic ${basicAuth}`,
+        Accept: "application/json",
+      };
+      if (env.brivoApiKey) {
+        queryHeaders[env.brivoApiKeyHeader] = env.brivoApiKey;
+      }
       response = await fetch(queryStyleUrl, {
         method: "POST",
-        headers: {
-          Authorization: `Basic ${basicAuth}`,
-          Accept: "application/json",
-        },
+        headers: queryHeaders,
       });
     }
 
