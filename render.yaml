@@ -1,33 +1,43 @@
+databases:
+  - name: wyze-rto-db
+    databaseName: wyze_rto
+    user: wyze_rto_user
+    plan: free
+
 services:
   - type: web
-    name: wyze-pulse
+    name: wyze-rto-attendance
     runtime: node
     plan: free
     region: oregon
-    branch: main
+    repo: https://github.com/olivialiuwyzettest/test2.git
+    branch: codex/wbr-deck-agent
     autoDeploy: true
-    buildCommand: corepack enable && corepack prepare pnpm@10.29.2 --activate && pnpm install --frozen-lockfile --prod=false && pnpm build
-    # Use npm for runtime start (always available), even though we build/install with pnpm.
-    startCommand: NODE_ENV=production npm run start -- -p $PORT -H 0.0.0.0
-    healthCheckPath: /
+    healthCheckPath: /login
+    buildCommand: corepack enable && corepack prepare pnpm@10.29.2 --activate && pnpm install --frozen-lockfile --prod=false && pnpm db:generate && pnpm build
+    startCommand: pnpm db:deploy && pnpm start -- -p $PORT -H 0.0.0.0
     envVars:
-      - key: TIMEZONE
+      - key: DATABASE_URL
+        fromDatabase:
+          name: wyze-rto-db
+          property: connectionString
+      - key: APP_SHARED_ACCESS_CODE
+        sync: false
+      - key: APP_ALLOWED_EMAIL_DOMAINS
+        value: wyze.com
+      - key: APP_SESSION_SECRET
+        generateValue: true
+      - key: APP_DEFAULT_TIMEZONE
         value: America/Los_Angeles
-      - key: DATA_CONNECTORS
-        value: sample
-
-      # Optional (only needed if you enable non-sample connectors)
-      - key: OPENAI_API_KEY
-        sync: false
-      - key: RSS_FEEDS
-        sync: false
-      - key: REDDIT_CLIENT_ID
-        sync: false
-      - key: REDDIT_CLIENT_SECRET
-        sync: false
-      - key: REDDIT_REFRESH_TOKEN
-        sync: false
-      - key: REDDIT_QUERY
-        sync: false
-      - key: REDDIT_SUBREDDITS
-        sync: false
+      - key: APP_CRON_SECRET
+        generateValue: true
+      - key: BRIVO_MODE
+        value: mock
+      - key: BRIVO_WEBHOOK_MODE
+        value: "false"
+      - key: BRIVO_WEBHOOK_SECRET
+        generateValue: true
+      - key: BRIVO_ENTRY_EVENT_MARKERS
+        value: OPEN,ACCESS_GRANTED,DOOR_OPEN,ACCESS-ALLOWED
+      - key: BRIVO_AUTO_LINK_BY_EMAIL
+        value: "false"

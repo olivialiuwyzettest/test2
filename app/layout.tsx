@@ -16,8 +16,9 @@ const fontDisplay = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Wyze Pulse",
-  description: "Daily sentiment + competitive landscape dashboard for Wyze.",
+  title: "Wyze RTO Attendance",
+  description:
+    "Internal attendance and RTO compliance dashboard for Wyze leadership and managers.",
 };
 
 export default function RootLayout({
@@ -42,4 +43,3 @@ export default function RootLayout({
     </html>
   );
 }
-

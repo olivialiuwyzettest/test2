@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  LEADER
+  MANAGER
+}
+
+enum Weekday {
+  MON
+  TUE
+  WED
+  THU
+  FRI
+  SAT
+  SUN
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum AttendanceSource {
+  POLLING
+  WEBHOOK
+  MANUAL
+}
+
+model AppUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      Role
+  createdAt DateTime @default(now())
+}
+
+model Team {
+  id                  String     @id @default(cuid())
+  name                String     @unique
+  scheduleDays        Weekday[]
+  requiredDaysPerWeek Int        @default(3)
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  employees           Employee[]
+}
+
+model OfficeLocation {
+  id          String          @id @default(cuid())
+  name        String          @unique
+  timezone    String          @default("America/Los_Angeles")
+  brivoSiteId String?         @unique
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  doors       Door[]
+  holidays    Holiday[]
+  employees   Employee[]
+  attendance  AttendanceDay[]
+}
+
+model Employee {
+  id                String          @id @default(cuid())
+  email             String          @unique
+  name              String
+  teamId            String
+  managerEmployeeId String?
+  officeLocationId  String?
+  status            EmployeeStatus  @default(ACTIVE)
+  brivoUserId       String?         @unique
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  team           Team           @relation(fields: [teamId], references: [id], onDelete: Restrict)
+  manager        Employee?      @relation("EmployeeManager", fields: [managerEmployeeId], references: [id], onDelete: SetNull)
+  reports        Employee[]     @relation("EmployeeManager")
+  officeLocation OfficeLocation? @relation(fields: [officeLocationId], references: [id], onDelete: SetNull)
+  attendanceDays AttendanceDay[]
+
+  @@index([teamId])
+  @@index([managerEmployeeId])
+  @@index([officeLocationId])
+}
+
+model Door {
+  id               String         @id @default(cuid())
+  officeLocationId String
+  brivoDoorId      String?        @unique
+  name             String
+  countsForEntry   Boolean        @default(true)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  officeLocation OfficeLocation @relation(fields: [officeLocationId], references: [id], onDelete: Cascade)
+
+  @@unique([officeLocationId, name])
+  @@index([officeLocationId])
+}
+
+model Holiday {
+  id               String          @id @default(cuid())
+  date             DateTime        @db.Date
+  name             String
+  officeLocationId String?
+  createdAt        DateTime        @default(now())
+
+  officeLocation OfficeLocation? @relation(fields: [officeLocationId], references: [id], onDelete: Cascade)
+
+  @@unique([date, name, officeLocationId])
+  @@index([date])
+  @@index([officeLocationId])
+}
+
+model BrivoEventRaw {
+  id             String   @id @default(cuid())
+  brivoEventId   String   @unique
+  occurredAt     DateTime
+  brivoUserId    String?
+  brivoDoorId    String?
+  securityAction String?
+  eventType      String?
+  payloadJson    Json
+  ingestionMode  AttendanceSource @default(POLLING)
+  createdAt      DateTime @default(now())
+
+  @@index([occurredAt])
+  @@index([brivoUserId])
+  @@index([brivoDoorId])
+}
+
+model AttendanceDay {
+  id               String           @id @default(cuid())
+  employeeId       String
+  date             DateTime         @db.Date
+  firstSeenAt      DateTime?
+  lastSeenAt       DateTime?
+  present          Boolean          @default(false)
+  officeLocationId String?
+  source           AttendanceSource @default(POLLING)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  employee       Employee        @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  officeLocation OfficeLocation? @relation(fields: [officeLocationId], references: [id], onDelete: SetNull)
+
+  @@unique([employeeId, date])
+  @@index([date])
+  @@index([officeLocationId])
+}
+
+model IngestionCursor {
+  id              String   @id
+  lastOccurredAt  DateTime?
+  lastBrivoEventId String?
+  updatedAt       DateTime @updatedAt
+}
+
+model AppSetting {
+  key       String   @id
+  valueJson Json
+  updatedAt DateTime @updatedAt
+}

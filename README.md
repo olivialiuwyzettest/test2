@@ -1,93 +1,196 @@
-# Wyze Pulse
+# Wyze RTO Attendance (MVP)
 
-Daily sentiment + competitive landscape dashboard for Wyze vs competitors.
+Internal web app for Wyze managers and leadership to track daily office attendance and weekly RTO compliance using Brivo badge data.
 
-- Single page dashboard: `/`
-- Methodology: `/methodology`
-- TV mode: `/tv`
-- Static data files under `public/data/` (committed + refreshed by GitHub Actions)
-- Pluggable connectors (`sample` required; `rss` + `reddit` optional/opt-in)
+## What This MVP Includes
 
-## Local Development
+- Simple gated login (`email + shared access code`) with `@wyze.com` domain allowlist.
+- RBAC from DB (`AppUser` table): `ADMIN`, `LEADER`, `MANAGER`.
+- Dashboards:
+  - `/leader`: org compliance, team-level drilldown, trailing trends.
+  - `/manager`: direct-report compliance with deficits and last seen.
+  - `/teams/[teamId]`: week heatmap (employees x weekdays).
+  - `/employees/[employeeId]`: trend + daily markers (+ raw events for admins only).
+  - `/admin`: schedules, doors, roster import, holidays import, Brivo mappings, sync controls.
+- Brivo adapter layer with `mock` and `live` modes.
+- Polling sync + webhook receiver + daily reconciliation endpoint.
+- CSV export for compliance summaries.
+
+## Tech Stack
+
+- Next.js App Router + TypeScript
+- Tailwind + lightweight shadcn-style UI components
+- PostgreSQL + Prisma + SQL migrations
+- Recharts for trends
+
+## Local Setup
+
+1. Copy env template:
 
 ```bash
-pnpm i
+cp .env.example .env
+```
+
+2. Set required values in `.env`:
+
+- `DATABASE_URL`
+- `APP_SHARED_ACCESS_CODE`
+- `APP_SESSION_SECRET`
+
+3. Install dependencies:
+
+```bash
+pnpm install
+```
+
+4. Run migrations + seed sample data:
+
+```bash
+pnpm db:generate
+pnpm db:deploy
+pnpm db:seed
+```
+
+5. Start app:
+
+```bash
 pnpm dev
 ```
 
 Open: http://localhost:3000
 
-## Data Refresh
+## Seeded Demo Accounts
 
-### Sample Data (no keys required)
+Use any seeded account + `APP_SHARED_ACCESS_CODE` to sign in:
 
-```bash
-pnpm refresh-data:sample
+- `admin@wyze.com` (ADMIN)
+- `leader@wyze.com` (LEADER)
+- `manager.product@wyze.com` (MANAGER)
+- `manager.eng@wyze.com` (MANAGER)
+- `manager.cx@wyze.com` (MANAGER)
+
+## Data Model
+
+Core Prisma models:
+
+- `AppUser`: app allowlist + role mapping
+- `Employee`: roster identity + team + manager + optional `brivoUserId`
+- `Team`: schedule days + required days policy
+- `OfficeLocation`: location + timezone + optional Brivo site ID
+- `Door`: location door config + `countsForEntry`
+- `Holiday`: configurable holiday calendar (global or location-specific)
+- `BrivoEventRaw`: idempotent raw event storage (`brivoEventId` unique)
+- `AttendanceDay`: derived per-employee daily presence records
+- `IngestionCursor`: polling watermark
+- `AppSetting`: persistent app settings (e.g., webhook subscription metadata)
+
+Migration SQL is committed in `/prisma/migrations/20260218120000_init/migration.sql`.
+
+## Compliance Logic
+
+A day is counted present when:
+
+1. Event is linked to a known door with `countsForEntry=true`
+2. Event marker indicates successful entry (`eventType` or `securityAction` in configured marker list)
+3. Brivo user is mapped to an employee (`Employee.brivoUserId`)
+
+Weekly calculations:
+
+- Eligible workdays = Mon-Fri minus configured holidays (global + location-specific)
+- `baseRequired` = `Team.requiredDaysPerWeek` (default 3)
+- `requiredDaysAdjusted` = `min(baseRequired, eligibleWorkdaysCount)`
+- `actualDays` = count of present eligible days
+- `policyCompliant` = `actualDays >= requiredDaysAdjusted`
+- `scheduleAdherencePct` = `attendedOnScheduledDays / scheduledEligibleDays`
+
+### Example
+
+Team schedule: `MON,WED,THU`, required `3`
+
+- If week has 5 eligible days: `requiredDaysAdjusted = 3`
+- If one holiday removes Thu and eligible days become 4: still `3`
+- If multiple holidays drop eligible days to 2: `requiredDaysAdjusted = 2`
+
+## Imports (Admin)
+
+### Roster CSV
+
+Expected headers (case-insensitive):
+
+- `email`, `name`, `team`
+- Optional: `managerEmail`, `status`, `brivoUserId`, `officeLocation`, `timezone`, `scheduleDays`, `requiredDaysPerWeek`
+
+### Holidays CSV or JSON
+
+CSV:
+
+```csv
+date,name,officeLocation
+2026-11-26,Thanksgiving,Seattle HQ
+2026-11-27,Day After Thanksgiving,Seattle HQ
 ```
 
-This uses `data/sample_mentions.json` only, with deterministic enrichment (no network).
+JSON:
 
-### Real Refresh (OpenAI + optional connectors)
-
-Set `OPENAI_API_KEY`, then:
-
-```bash
-pnpm refresh-data
+```json
+[
+  { "date": "2026-11-26", "name": "Thanksgiving", "officeLocation": "Seattle HQ" }
+]
 ```
 
-Notes:
+Note: the app does **not** assume US federal holidays; holidays are fully admin-configurable.
 
-- `DATA_CONNECTORS` defaults to `sample`.
-- If you enable `rss` or `reddit`, `OPENAI_API_KEY` is required.
-- RSS/Reddit connectors are opt-in and use official/public APIs (no brittle scraping by default).
-- Coverage note: if you restrict ingestion to only one brand community (e.g., only Wyze),
-  competitor comparisons will be biased. Include competitor sources too.
+### Brivo Mapping CSV
 
-### Reddit Coverage (Competitor Forums)
+```csv
+employeeEmail,brivoUserId
+alice.pm@wyze.com,12345
+```
 
-The Reddit connector uses the official API and:
+## Brivo Integration
 
-- Searches for mentions of all tracked brands (Wyze + competitors), and
-- By default also scans a set of brand/community subreddits so competitor forums
-  are included even when posts omit the brand name.
+### Modes
 
-You can override the scanned subreddits via `REDDIT_SUBREDDITS`, or disable forum
-scanning via `REDDIT_SCAN_FORUMS=false`.
+- `BRIVO_MODE=mock` (default): deterministic generated events for local/dev use.
+- `BRIVO_MODE=live`: uses real OAuth + Brivo API requests.
 
-## Deployment (Vercel)
+### Live Mode Env Vars
 
-1. Import the repo in Vercel
-2. Set environment variables (optional for sample-only mode):
-   - `TIMEZONE` (default is `America/Los_Angeles`)
-   - `OPENAI_API_KEY` (required if you enable non-sample connectors)
-   - `DATA_CONNECTORS`, `RSS_FEEDS`, and Reddit credentials as needed
-3. Deploy
+Set:
 
-The site updates when `public/data/*.json` changes on `main` (or your default branch).
+- `BRIVO_API_KEY`
+- `BRIVO_CLIENT_ID`
+- `BRIVO_CLIENT_SECRET`
+- Optional: `BRIVO_USERNAME` and `BRIVO_PASSWORD` for password grant
 
-## Deployment (Render)
+Adapter supports endpoints:
 
-This repo includes a Render Blueprint at `render.yaml`.
+- `/users`
+- `/sites`
+- `/events`
+- `/event-subscriptions`
 
-1. Push the repo to GitHub/GitLab/Bitbucket (Render Blueprints are Git-backed)
-2. In Render Dashboard: New +, select "Blueprint"
-3. Point it at your repo and apply
-4. Set any secrets marked `sync: false` (only needed if you enable `rss`/`reddit`)
+`Authorization: Bearer <token>` and configurable API key header are both sent.
 
-Note: `render.yaml` defaults to deploying the `main` branch. If you deploy a different branch, update `branch:` in `render.yaml` (or rename your default branch to `main`).
+### Polling Sync
 
-## Daily Refresh (No Server Required)
+- Admin button: “Sync Now” (yesterday -> now)
+- API cron endpoint: `GET /api/cron/sync` (optionally protected by `APP_CRON_SECRET`)
 
-This repo includes a scheduled GitHub Actions workflow: `.github/workflows/daily-refresh.yml`.
+### Webhook Mode
 
-- It runs daily on a cron schedule and on manual dispatch.
-- It runs `pnpm refresh-data`, then commits and pushes changes **only if** `public/data/*.json` changed.
-- The cron schedule is defined in **UTC** (GitHub Actions uses UTC for cron).
+- Receiver endpoint: `POST /api/brivo/webhook`
+- Admin action creates/refreshes `/event-subscriptions`
+- Supports reconciliation alongside polling
 
-This pattern works well with Vercel/Netlify because a commit triggers a redeploy.
+## Export
 
-## Data + Privacy Notes
+- Compliance CSV export endpoint:
+  - `/api/export/compliance?week=YYYY-MM-DD&teamId=...&locationId=...`
 
-- This dashboard is designed to ingest **public** text and source URLs only.
-- Do not store emails, phone numbers, or other private identifiers.
-- External connectors are disabled by default and should be configured to follow source ToS.
+## Notes / TODO for Real Brivo Tenant
+
+- Confirm exact `/events` query parameter names/shape for your account.
+- Confirm exact `/event-subscriptions` payload contract.
+- Validate token grant type requirements for your tenant (`password` vs `client_credentials`).
+- Optionally add request signature verification details from Brivo webhook docs.
