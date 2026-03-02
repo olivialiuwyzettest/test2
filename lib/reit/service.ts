@@ -17,6 +17,7 @@ async function buildDemoSnapshot(asOf: Date): Promise<ReitDashboardSnapshot> {
   const generatedAt = new Date().toISOString();
   const universe = getBaseUniverse().slice(0, 20);
   const yields = await fetchDividendYields(universe.map((item) => item.ticker)).catch(() => new Map());
+  const liveYieldCount = [...yields.values()].filter((value): value is number => value !== null).length;
 
   const recommendations: ReitRecommendation[] = universe.map((item) => {
     const seed = hashToUnit(`${asOfDate}-${item.ticker}`);
@@ -46,8 +47,7 @@ async function buildDemoSnapshot(asOf: Date): Promise<ReitDashboardSnapshot> {
         ret252dPct: Number((-8 + seed * 30).toFixed(2)),
         rateBeta: Number((0.2 + seed * 0.8).toFixed(3)),
         liqUsd20d: Math.round(1_500_000 + seed * 15_000_000),
-        dividendYieldPct:
-          yields.get(item.ticker) ?? Number((2.2 + seed * 4.3).toFixed(2)),
+        dividendYieldPct: yields.get(item.ticker) ?? null,
       },
       components: {
         dip: Number(dip.toFixed(4)),
@@ -110,7 +110,7 @@ async function buildDemoSnapshot(asOf: Date): Promise<ReitDashboardSnapshot> {
     tail: recommendations.slice(-5),
     notes: [
       "Demo snapshot generated because live providers were unavailable.",
-      "Dividend yields are pulled from Stooq; macro + scores remain demo until FRED_API_KEY is set.",
+      `Dividend yields pulled from Stooq for ${liveYieldCount}/${universe.length} tickers.`,
       "Set FRED_API_KEY and run refresh again to switch to live macro + price data.",
     ],
   };

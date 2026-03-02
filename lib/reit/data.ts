@@ -7,7 +7,8 @@ import {
 } from "./config";
 import type { MacroInputs, MacroSeriesPoint, PriceBar, ReitUniverseItem } from "./types";
 
-const USER_AGENT = "reit-dashboard-bot/1.0 (research dashboard)";
+const USER_AGENT =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 const FRED_ENDPOINT = "https://api.stlouisfed.org/fred/series/observations";
 const CBOE_PUTCALL_URL =
   "https://cdn.cboe.com/resources/options/volume_and_call_put_ratios/indexpcarchive.csv";
