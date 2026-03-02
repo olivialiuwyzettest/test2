@@ -154,7 +154,7 @@ export default async function ReitDashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Macro Readings</CardTitle>
-            <CardDescription>Core regime inputs used in today's score.</CardDescription>
+            <CardDescription>Core regime inputs used in today&apos;s score.</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-3">
             {snapshot.macro.keyReadings.map((reading) => (
