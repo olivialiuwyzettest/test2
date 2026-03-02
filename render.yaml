@@ -41,3 +41,32 @@ services:
         value: OPEN,ACCESS_GRANTED,DOOR_OPEN,ACCESS-ALLOWED
       - key: BRIVO_AUTO_LINK_BY_EMAIL
         value: "false"
+      - key: FRED_API_KEY
+        sync: false
+      - key: REIT_CRON_SECRET
+        sync: false
+      - key: REIT_TOP_N
+        value: "12"
+      - key: REIT_LIQUIDITY_FLOOR_USD
+        value: "1500000"
+      - key: REIT_STRESS_LOOKBACK_DAYS
+        value: "1200"
+      - key: REIT_UNIVERSE_SOURCE
+        value: schh
+
+  - type: cron
+    name: reit-daily-refresh
+    runtime: node
+    plan: free
+    region: oregon
+    schedule: "5 13 * * *"
+    repo: https://github.com/olivialiuwyzettest/test2.git
+    branch: codex/wbr-deck-agent
+    buildCommand: corepack enable && corepack prepare pnpm@10.29.2 --activate && pnpm install --frozen-lockfile --prod=false
+    startCommand: >-
+      node -e "const base=(process.env.REIT_DASHBOARD_URL||'').replace(/\\/$/,''); const secret=process.env.REIT_CRON_SECRET||''; if(!base){throw new Error('Missing REIT_DASHBOARD_URL');} fetch(base + '/api/cron/reit-refresh?secret=' + encodeURIComponent(secret)).then(async (res)=>{const body=await res.text(); if(!res.ok){throw new Error(body);} console.log(body);}).catch((err)=>{console.error(err); process.exit(1);});"
+    envVars:
+      - key: REIT_DASHBOARD_URL
+        value: https://wyze-rto-attendance.onrender.com
+      - key: REIT_CRON_SECRET
+        sync: false

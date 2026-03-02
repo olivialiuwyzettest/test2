@@ -19,7 +19,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset --force",
-    "cron:sync": "tsx scripts/brivo-cron.ts"
+    "cron:sync": "tsx scripts/brivo-cron.ts",
+    "reit:refresh": "tsx scripts/reit-refresh.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.16.2",

@@ -5,6 +5,9 @@ import { SESSION_COOKIE_NAME } from "@/lib/auth/constants";
 const PUBLIC_PATH_PREFIXES = [
   "/login",
   "/unauthorized",
+  "/reit",
+  "/api/reit/latest",
+  "/api/cron/reit-refresh",
   "/api/brivo/webhook",
   "/api/cron/sync",
   "/favicon.ico",

@@ -195,3 +195,39 @@ Adapter supports endpoints:
 - Confirm exact `/event-subscriptions` payload contract.
 - Validate token grant type requirements for your tenant (`password` vs `client_credentials`).
 - Optionally add request signature verification details from Brivo webhook docs.
+
+## REIT Daily Recommendation Dashboard
+
+This repo now includes a public dashboard at `/reit` that computes daily REIT dip recommendations using:
+
+- Macro regime and stress signals from FRED (VIX, credit spreads, rates, USD, oil, SOFR, claims/recession proxies)
+- Cboe put/call ratio archive sentiment
+- Daily REIT prices from Stooq
+- Sector AI structural multipliers and recession gating
+
+### Run locally
+
+1. Add env values:
+
+```bash
+FRED_API_KEY=...
+REIT_CRON_SECRET=your-secret
+```
+
+2. Refresh snapshot:
+
+```bash
+pnpm reit:refresh
+```
+
+3. Open:
+
+- `http://localhost:3000/reit`
+- `http://localhost:3000/api/reit/latest`
+
+### Automation endpoints
+
+- `GET /api/cron/reit-refresh` (supports `x-cron-secret` header or `?secret=...`)
+- `GET /api/reit/latest`
+
+If no live data is available yet, the refresh pipeline writes a demo snapshot so the page stays online.
