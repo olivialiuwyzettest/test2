@@ -90,6 +90,7 @@ export type ReitComputedFeatures = {
   ma200Slope: number;
   rateBeta: number;
   liqUsd20d: number;
+  dividendYieldPct: number | null;
 };
 
 export type ReitRecommendation = {
@@ -107,6 +108,7 @@ export type ReitRecommendation = {
     ret252dPct: number;
     rateBeta: number;
     liqUsd20d: number;
+    dividendYieldPct: number | null;
   };
   components: {
     dip: number;
@@ -136,6 +138,7 @@ export type ReitDashboardSnapshot = {
     };
   };
   macro: MacroSnapshot;
+  ranked: ReitRecommendation[];
   recommendations: ReitRecommendation[];
   tail: ReitRecommendation[];
   notes: string[];

@@ -6,6 +6,7 @@ import {
   aiScoreToUnit,
 } from "./config";
 import {
+  fetchDividendYields,
   fetchMacroInputs,
   fetchTickerPriceHistory,
   loadReitUniverse,
@@ -405,6 +406,7 @@ function computeFeatures(
     ma200Slope,
     rateBeta,
     liqUsd20d,
+    dividendYieldPct: null,
   };
 }
 
@@ -450,6 +452,10 @@ function buildRationale(features: ReitComputedFeatures, score: number, regime: M
     notes.push("Would benefit if long rates ease");
   }
 
+  if (features.dividendYieldPct !== null && features.dividendYieldPct >= 4) {
+    notes.push("Attractive dividend yield support");
+  }
+
   if (regime === "panic_improving") {
     notes.push("Macro panic regime improving");
   }
@@ -465,7 +471,7 @@ function scoreRecommendations(
   features: ReitComputedFeatures[],
   macro: MacroDerived,
   topN: number,
-): { recommendations: ReitRecommendation[]; tail: ReitRecommendation[] } {
+): { ranked: ReitRecommendation[]; recommendations: ReitRecommendation[]; tail: ReitRecommendation[] } {
   const ddRank = scoreByRank(features.map((f) => f.dd52w), "lower");
   const rsiRank = scoreByRank(features.map((f) => f.rsi14), "lower");
   const ret20Rank = scoreByRank(features.map((f) => f.ret20d), "lower");
@@ -507,6 +513,8 @@ function scoreRecommendations(
         ret252dPct: round(feature.ret252d * 100, 2),
         rateBeta: round(feature.rateBeta, 3),
         liqUsd20d: round(feature.liqUsd20d, 0),
+        dividendYieldPct:
+          feature.dividendYieldPct === null ? null : round(feature.dividendYieldPct, 2),
       },
       components: {
         dip: round(dip, 4),
@@ -527,6 +535,7 @@ function scoreRecommendations(
   });
 
   return {
+    ranked: recommendations,
     recommendations: recommendations.slice(0, topN),
     tail: recommendations.slice(-5),
   };
@@ -571,7 +580,13 @@ export async function buildReitSnapshot(asOf = new Date()): Promise<ReitDashboar
     throw new Error("No REITs passed minimum history/liquidity filters.");
   }
 
-  const { recommendations, tail } = scoreRecommendations(computedFeatures, macroDerived, topN);
+  const yieldByTicker = await fetchDividendYields(computedFeatures.map((item) => item.ticker));
+  const featuresWithYield = computedFeatures.map((item) => ({
+    ...item,
+    dividendYieldPct: yieldByTicker.get(item.ticker) ?? null,
+  }));
+
+  const { ranked, recommendations, tail } = scoreRecommendations(featuresWithYield, macroDerived, topN);
 
   const notes: string[] = [];
   if (macroDerived.snapshot.regime === "panic_worsening") {
@@ -602,6 +617,7 @@ export async function buildReitSnapshot(asOf = new Date()): Promise<ReitDashboar
       },
     },
     macro: macroDerived.snapshot,
+    ranked,
     recommendations,
     tail,
     notes,

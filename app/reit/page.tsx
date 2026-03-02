@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Sparkline } from "@/components/charts/sparkline";
+import { ReitSignalCharts } from "@/components/reit/reit-signal-charts";
 import { getReitSnapshot } from "@/lib/reit/load";
 
 export const dynamic = "force-dynamic";
@@ -19,9 +20,20 @@ function usd(value: number): string {
   }).format(value);
 }
 
+function formatYield(value: number | null): string {
+  if (value === null) return "n/a";
+  return `${value.toFixed(2)}%`;
+}
+
+function average(values: number[]): number | null {
+  if (!values.length) return null;
+  const total = values.reduce((sum, value) => sum + value, 0);
+  return total / values.length;
+}
+
 function signalLabel(signal: string): string {
   if (signal === "strong_buy") return "Strong Buy";
-  if (signal === "buy_dip") return "Buy Dip";
+  if (signal === "buy_dip") return "Weak Buy";
   if (signal === "watch") return "Watch";
   return "Hold Back";
 }
@@ -52,6 +64,10 @@ export default async function ReitDashboardPage() {
   }
 
   const msiPoints = snapshot.macro.msiHistory.map((point) => point.msi);
+  const yieldValues = snapshot.ranked
+    .map((item) => item.features.dividendYieldPct)
+    .filter((value): value is number => value !== null);
+  const avgYield = average(yieldValues);
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -79,6 +95,9 @@ export default async function ReitDashboardPage() {
                   RiskGate {snapshot.macro.riskGate.toFixed(2)}
                 </span>
               </div>
+              <div className="mt-2 text-xs text-muted-foreground">
+                Avg dividend yield (ranked): {formatYield(avgYield)}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -103,6 +122,28 @@ export default async function ReitDashboardPage() {
       <section className="mb-6">
         <Card>
           <CardHeader>
+            <CardTitle>Signal Charts</CardTitle>
+            <CardDescription>
+              Visual map of Strong Buy vs Weak Buy vs Watch, plus dividend-yield context.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ReitSignalCharts
+              points={snapshot.ranked.map((item) => ({
+                ticker: item.ticker,
+                signal: item.signal,
+                score: item.score,
+                dd52wPct: item.features.dd52wPct,
+                dividendYieldPct: item.features.dividendYieldPct,
+              }))}
+            />
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="mb-6">
+        <Card>
+          <CardHeader>
             <CardTitle>Top Recommendations</CardTitle>
             <CardDescription>
               Final score = 100 x RiskGate x weighted component blend. Higher score means stronger dip setup.
@@ -120,6 +161,7 @@ export default async function ReitDashboardPage() {
                   <TableHead className="text-right">RSI(14)</TableHead>
                   <TableHead className="text-right">20D Return</TableHead>
                   <TableHead className="text-right">252D Return</TableHead>
+                  <TableHead className="text-right">Dividend Yield</TableHead>
                   <TableHead className="text-right">Rate Beta</TableHead>
                   <TableHead className="text-right">20D Liquidity</TableHead>
                 </TableRow>
@@ -140,6 +182,9 @@ export default async function ReitDashboardPage() {
                     <TableCell className="text-right">{row.features.rsi14.toFixed(1)}</TableCell>
                     <TableCell className="text-right">{pct(row.features.ret20dPct)}</TableCell>
                     <TableCell className="text-right">{pct(row.features.ret252dPct)}</TableCell>
+                    <TableCell className="text-right">
+                      {formatYield(row.features.dividendYieldPct)}
+                    </TableCell>
                     <TableCell className="text-right">{row.features.rateBeta.toFixed(3)}</TableCell>
                     <TableCell className="text-right">{usd(row.features.liqUsd20d)}</TableCell>
                   </TableRow>

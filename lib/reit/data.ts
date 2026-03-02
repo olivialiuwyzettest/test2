@@ -293,6 +293,42 @@ export async function fetchTickerPriceHistory(ticker: string): Promise<PriceBar[
   return parseStooqCsv(csv);
 }
 
+function parsePercentValue(raw: string): number | null {
+  const cleaned = raw.replace(",", ".").replace("%", "").trim();
+  if (!cleaned || cleaned === "-") return null;
+  const value = Number.parseFloat(cleaned);
+  if (!Number.isFinite(value)) return null;
+  return value;
+}
+
+async function fetchTickerDividendYield(ticker: string): Promise<number | null> {
+  const symbol = `${normalizeTicker(ticker).toLowerCase()}.us`;
+  const url = `https://stooq.com/q/g/?s=${symbol}`;
+  const html = await fetchText(url);
+
+  const match = html.match(
+    /(?:Stopa dywidendy|Dividend Yield)\s*<\/td>\s*<td[^>]*>\s*([0-9.,-]+)\s*%/i,
+  );
+
+  if (!match || !match[1]) return null;
+  return parsePercentValue(match[1]);
+}
+
+export async function fetchDividendYields(tickers: string[]): Promise<Map<string, number | null>> {
+  const unique = [...new Set(tickers.map(normalizeTicker).filter(Boolean))];
+
+  const entries = await mapWithConcurrency(unique, 4, async (ticker) => {
+    try {
+      const dividendYield = await fetchTickerDividendYield(ticker);
+      return [ticker, dividendYield] as const;
+    } catch {
+      return [ticker, null] as const;
+    }
+  });
+
+  return new Map(entries);
+}
+
 export async function mapWithConcurrency<T, R>(
   items: T[],
   concurrency: number,

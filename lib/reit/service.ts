@@ -44,6 +44,7 @@ function buildDemoSnapshot(asOf: Date): ReitDashboardSnapshot {
         ret252dPct: Number((-8 + seed * 30).toFixed(2)),
         rateBeta: Number((0.2 + seed * 0.8).toFixed(3)),
         liqUsd20d: Math.round(1_500_000 + seed * 15_000_000),
+        dividendYieldPct: Number((2.2 + seed * 4.3).toFixed(2)),
       },
       components: {
         dip: Number(dip.toFixed(4)),
@@ -101,6 +102,7 @@ function buildDemoSnapshot(asOf: Date): ReitDashboardSnapshot {
         msi: Number((0.5 - i * 0.004).toFixed(4)),
       })),
     },
+    ranked: recommendations,
     recommendations: recommendations.slice(0, 10),
     tail: recommendations.slice(-5),
     notes: [
