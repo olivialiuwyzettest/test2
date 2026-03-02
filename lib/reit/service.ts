@@ -110,7 +110,7 @@ async function buildDemoSnapshot(asOf: Date): Promise<ReitDashboardSnapshot> {
     tail: recommendations.slice(-5),
     notes: [
       "Demo snapshot generated because live providers were unavailable.",
-      `Dividend yields pulled from Stooq for ${liveYieldCount}/${universe.length} tickers.`,
+      `Dividend yields pulled from free providers for ${liveYieldCount}/${universe.length} tickers.`,
       "Set FRED_API_KEY and run refresh again to switch to live macro + price data.",
     ],
   };

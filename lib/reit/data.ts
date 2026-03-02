@@ -302,7 +302,20 @@ function parsePercentValue(raw: string): number | null {
   return value;
 }
 
-async function fetchTickerDividendYield(ticker: string): Promise<number | null> {
+async function fetchTickerDividendYieldFromStockAnalysis(ticker: string): Promise<number | null> {
+  const symbol = normalizeTicker(ticker).toLowerCase().replace(/\./g, "-");
+  const url = `https://stockanalysis.com/stocks/${symbol}/dividend/`;
+  const html = await fetchText(url);
+
+  const match =
+    html.match(/infoTable:\{[^}]*?yield:"([0-9.]+)%"/s) ??
+    html.match(/"infoTable"\s*:\s*\{[^}]*?"yield"\s*:\s*"([0-9.]+)%"/s);
+
+  if (!match || !match[1]) return null;
+  return parsePercentValue(match[1]);
+}
+
+async function fetchTickerDividendYieldFromStooq(ticker: string): Promise<number | null> {
   const symbol = `${normalizeTicker(ticker).toLowerCase()}.us`;
   const url = `https://stooq.com/q/g/?s=${symbol}`;
   const html = await fetchText(url);
@@ -315,6 +328,17 @@ async function fetchTickerDividendYield(ticker: string): Promise<number | null> 
 
   if (!match || !match[1]) return null;
   return parsePercentValue(match[1]);
+}
+
+async function fetchTickerDividendYield(ticker: string): Promise<number | null> {
+  try {
+    const fromStockAnalysis = await fetchTickerDividendYieldFromStockAnalysis(ticker);
+    if (fromStockAnalysis !== null) return fromStockAnalysis;
+  } catch {
+    // Fall through to secondary source.
+  }
+
+  return fetchTickerDividendYieldFromStooq(ticker);
 }
 
 export async function fetchDividendYields(tickers: string[]): Promise<Map<string, number | null>> {
