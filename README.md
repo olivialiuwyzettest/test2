@@ -230,4 +230,10 @@ pnpm reit:refresh
 - `GET /api/cron/reit-refresh` (supports `x-cron-secret` header or `?secret=...`)
 - `GET /api/reit/latest`
 
+### Daily automation
+
+- GitHub Actions workflow: `.github/workflows/reit-refresh.yml`
+- Schedule: `13:05 UTC` daily (05:05 PT during standard time / 06:05 PT during daylight time)
+- If repo secret `REIT_CRON_SECRET` is set, the workflow sends it as `x-cron-secret`.
+
 If no live data is available yet, the refresh pipeline writes a demo snapshot so the page stays online.

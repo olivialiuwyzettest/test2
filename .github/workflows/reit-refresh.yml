@@ -1,0 +1,22 @@
+name: REIT Daily Refresh
+
+on:
+  schedule:
+    - cron: "5 13 * * *"
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger REIT refresh endpoint
+        env:
+          REIT_REFRESH_URL: https://wyze-pulse.onrender.com/api/cron/reit-refresh
+          REIT_CRON_SECRET: ${{ secrets.REIT_CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -n "${REIT_CRON_SECRET:-}" ]; then
+            curl -fsS -H "x-cron-secret: ${REIT_CRON_SECRET}" "$REIT_REFRESH_URL"
+          else
+            curl -fsS "$REIT_REFRESH_URL"
+          fi

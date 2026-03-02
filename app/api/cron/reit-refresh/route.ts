@@ -4,7 +4,7 @@ import { refreshAndPersistReitSnapshot } from "@/lib/reit/service";
 export const runtime = "nodejs";
 
 function getCronSecret(): string | null {
-  return process.env.REIT_CRON_SECRET ?? process.env.APP_CRON_SECRET ?? null;
+  return process.env.REIT_CRON_SECRET ?? null;
 }
 
 function authorized(request: Request): boolean {
