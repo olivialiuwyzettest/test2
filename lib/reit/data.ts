@@ -306,9 +306,11 @@ async function fetchTickerDividendYield(ticker: string): Promise<number | null> 
   const url = `https://stooq.com/q/g/?s=${symbol}`;
   const html = await fetchText(url);
 
-  const match = html.match(
-    /(?:Stopa dywidendy|Dividend Yield)\s*<\/td>\s*<td[^>]*>\s*([0-9.,-]+)\s*%/i,
-  );
+  const match =
+    html.match(
+      /(?:Stopa dywidendy|Dividend Yield).*?<\/(?:font|td)>\s*<\/td>\s*<td[^>]*>\s*([0-9.,-]+)\s*%/is,
+    ) ??
+    html.match(/(?:Stopa dywidendy|Dividend Yield)[^0-9-]{0,180}([0-9.,-]+)\s*%/i);
 
   if (!match || !match[1]) return null;
   return parsePercentValue(match[1]);
