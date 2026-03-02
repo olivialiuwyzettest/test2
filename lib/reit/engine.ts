@@ -44,6 +44,17 @@ type MacroDerived = {
   latestRiskGate: number;
 };
 
+type MacroIndicator = MacroSnapshot["indicators"][number];
+
+type IndicatorDefinition = {
+  key: string;
+  label: string;
+  values: number[];
+  unit?: string;
+  betterWhen: "higher" | "lower";
+  why: string;
+};
+
 const DEFAULT_LOOKBACK_DAYS = 1_200;
 const DEFAULT_TOP_N = 12;
 const DEFAULT_LIQUIDITY_FLOOR_USD = 1_500_000;
@@ -153,6 +164,181 @@ function latestFinite(series: number[]): number {
 function latestRaw(points: MacroSeriesPoint[]): number {
   if (!points.length) return 0;
   return points[points.length - 1]!.value;
+}
+
+function latestFiniteIndex(values: number[]): number {
+  for (let i = values.length - 1; i >= 0; i -= 1) {
+    if (Number.isFinite(values[i])) return i;
+  }
+  return -1;
+}
+
+function computeLagDelta(values: number[], lag: number): { abs: number | null; pct: number | null } {
+  const latestIndex = latestFiniteIndex(values);
+  if (latestIndex < 0 || latestIndex < lag) {
+    return { abs: null, pct: null };
+  }
+
+  const current = values[latestIndex]!;
+  const prior = values[latestIndex - lag]!;
+
+  if (!Number.isFinite(current) || !Number.isFinite(prior)) {
+    return { abs: null, pct: null };
+  }
+
+  const abs = current - prior;
+  const pct = Math.abs(prior) > 0 ? (abs / Math.abs(prior)) * 100 : null;
+
+  return {
+    abs: round(abs, 3),
+    pct: pct === null || !Number.isFinite(pct) ? null : round(pct, 2),
+  };
+}
+
+function classifyStatus(
+  delta: number | null,
+  betterWhen: "higher" | "lower",
+): "improving" | "worsening" | "flat" {
+  if (delta === null || Math.abs(delta) < 0.0001) return "flat";
+  if (betterWhen === "lower") return delta < 0 ? "improving" : "worsening";
+  return delta > 0 ? "improving" : "worsening";
+}
+
+function impactFromStatus(status: "improving" | "worsening" | "flat"): "tailwind" | "headwind" | "neutral" {
+  if (status === "improving") return "tailwind";
+  if (status === "worsening") return "headwind";
+  return "neutral";
+}
+
+function buildIndicator(def: IndicatorDefinition): MacroIndicator {
+  const latestIndex = latestFiniteIndex(def.values);
+  const value = latestIndex >= 0 ? def.values[latestIndex]! : 0;
+
+  const dodDelta = computeLagDelta(def.values, 1);
+  const momDelta = computeLagDelta(def.values, 21);
+  const yoyDelta = computeLagDelta(def.values, 252);
+  const status = classifyStatus(momDelta.abs, def.betterWhen);
+  const reitImpact = impactFromStatus(status);
+
+  const statusText =
+    status === "improving" ? "Improving trend." : status === "worsening" ? "Worsening trend." : "Trend is flat.";
+
+  return {
+    key: def.key,
+    label: def.label,
+    value: round(value, 3),
+    unit: def.unit,
+    betterWhen: def.betterWhen,
+    dod: dodDelta.abs,
+    mom: momDelta.abs,
+    yoy: yoyDelta.abs,
+    dodPct: dodDelta.pct,
+    momPct: momDelta.pct,
+    yoyPct: yoyDelta.pct,
+    status,
+    reitImpact,
+    interpretation: `${statusText} ${def.why}`,
+  };
+}
+
+function classifyCyclePhase(
+  msiLevel: number,
+  msiTrend5d: number,
+  recessionRisk: number,
+  ratePressure: number,
+): {
+  phase: MacroSnapshot["cyclePhase"];
+  cycleScore: number;
+  summary: string;
+  playbook: string[];
+} {
+  const cycleScore = round(
+    clamp(
+      100 -
+        clamp(msiLevel, 0, 1) * 45 -
+        clamp(recessionRisk, 0, 1) * 40 -
+        clamp((ratePressure + 1.5) / 3, 0, 1) * 15,
+      0,
+      100,
+    ),
+    1,
+  );
+
+  if (msiLevel > 0.9 && msiTrend5d > 0) {
+    return {
+      phase: "panic_shock",
+      cycleScore,
+      summary: "High and rising stress. Preserve dry powder and avoid forced dip-buying.",
+      playbook: [
+        "Prioritize capital preservation; avoid adding to low-liquidity names.",
+        "Wait for MSI trend to turn down before scaling into new entries.",
+        "Focus only on highest-quality balance sheets and defensive property types.",
+      ],
+    };
+  }
+
+  if (recessionRisk > 0.7) {
+    return {
+      phase: "late_contraction",
+      cycleScore,
+      summary: "Recession risk is elevated. Be selective and defensive in new REIT exposure.",
+      playbook: [
+        "Favor residential, healthcare, and net lease over cyclical segments.",
+        "Use smaller position sizes and stagger entries over multiple days.",
+        "Require stronger trend confirmation before upgrading to Strong Buy.",
+      ],
+    };
+  }
+
+  if (msiLevel > 0.8 && msiTrend5d < 0) {
+    return {
+      phase: "early_recovery",
+      cycleScore,
+      summary: "Stress is still high but easing. This is the best setup for controlled dip buying.",
+      playbook: [
+        "Scale into Weak Buy names in 2-3 tranches instead of one order.",
+        "Favor names with high liquidity and improving technical trend.",
+        "Recheck rate-pressure trend daily; reduce adds if rates re-accelerate upward.",
+      ],
+    };
+  }
+
+  if (ratePressure > 0.5) {
+    return {
+      phase: "late_cycle_tightening",
+      cycleScore,
+      summary: "Rates are a headwind. Stay selective and prioritize resilient cash-flow REITs.",
+      playbook: [
+        "Prefer lower-beta REITs and stronger balance-sheet quality.",
+        "Demand larger drawdown discounts before entering rate-sensitive names.",
+        "Trim exposure to highly leveraged or cyclical property types.",
+      ],
+    };
+  }
+
+  if (recessionRisk < 0.35 && msiLevel < 0.6) {
+    return {
+      phase: "mid_cycle_expansion",
+      cycleScore,
+      summary: "Macro backdrop is relatively supportive. Broad participation is acceptable.",
+      playbook: [
+        "You can diversify across defensive and growth-oriented REIT sub-sectors.",
+        "Use score rank as the primary filter, then confirm with trend and liquidity.",
+        "Keep some dry powder for volatility spikes to improve entry prices.",
+      ],
+    };
+  }
+
+  return {
+    phase: "transition",
+    cycleScore,
+    summary: "Mixed macro signals. Stay balanced and favor incremental positioning.",
+    playbook: [
+      "Use partial entries and reassess after each major macro release.",
+      "Prefer names where both macro alignment and trend score are positive.",
+      "Avoid concentrating too heavily in one property type.",
+    ],
+  };
 }
 
 function computeMacroDerived(macro: MacroInputs, asOfDate: string): MacroDerived {
@@ -273,6 +459,79 @@ function computeMacroDerived(macro: MacroInputs, asOfDate: string): MacroDerived
     msi: round(msi[historyStart + index] ?? 0, 4),
   }));
 
+  const cycle = classifyCyclePhase(msiLevel, msiTrend5d, recessionRisk, latestFinite(ratePressure));
+  const indicators: MacroIndicator[] = [
+    buildIndicator({
+      key: "VIXCLS",
+      label: "VIX",
+      values: vix,
+      betterWhen: "lower",
+      why: "Lower equity volatility usually supports risk appetite for REIT allocations.",
+    }),
+    buildIndicator({
+      key: "HY_OAS",
+      label: "HY OAS",
+      values: hy,
+      unit: "bp",
+      betterWhen: "lower",
+      why: "Tighter credit spreads reduce refinancing stress for leveraged real estate.",
+    }),
+    buildIndicator({
+      key: "IG_OAS",
+      label: "IG OAS",
+      values: ig,
+      unit: "bp",
+      betterWhen: "lower",
+      why: "Lower IG spreads indicate easier financing conditions and lower default fear.",
+    }),
+    buildIndicator({
+      key: "DGS10",
+      label: "10Y Yield",
+      values: dgs10,
+      unit: "%",
+      betterWhen: "lower",
+      why: "Lower long rates generally support REIT valuations and cap-rate spreads.",
+    }),
+    buildIndicator({
+      key: "DFII10",
+      label: "10Y Real Yield",
+      values: dfii10,
+      unit: "%",
+      betterWhen: "lower",
+      why: "Lower real yields improve relative attractiveness of REIT income streams.",
+    }),
+    buildIndicator({
+      key: "SOFR",
+      label: "SOFR",
+      values: sofr,
+      unit: "%",
+      betterWhen: "lower",
+      why: "Lower short-term funding costs ease floating-rate debt pressure.",
+    }),
+    buildIndicator({
+      key: "ICSA",
+      label: "Initial Claims",
+      values: claims,
+      betterWhen: "lower",
+      why: "Rising claims can signal demand softening, especially for cyclical REIT segments.",
+    }),
+    buildIndicator({
+      key: "T10Y3M",
+      label: "10Y-3M Curve",
+      values: t10y3m,
+      unit: "%",
+      betterWhen: "higher",
+      why: "A less-inverted curve usually indicates improving forward growth expectations.",
+    }),
+    buildIndicator({
+      key: "PUTCALL",
+      label: "Put/Call Ratio",
+      values: putCall,
+      betterWhen: "lower",
+      why: "Lower option-hedging demand usually reflects lower broad-market panic.",
+    }),
+  ];
+
   return {
     latestRatePressure: latestFinite(ratePressure),
     latestRecessionRisk: recessionRisk,
@@ -290,6 +549,10 @@ function computeMacroDerived(macro: MacroInputs, asOfDate: string): MacroDerived
       oilShock: round(latestFinite(oilShock), 4),
       fundingStress: round(latestFinite(fundingStress), 4),
       putCallZ: round(latestFinite(zNormalize(putCall)), 4),
+      cyclePhase: cycle.phase,
+      cycleScore: cycle.cycleScore,
+      macroSummary: cycle.summary,
+      decisionPlaybook: cycle.playbook,
       keyReadings: [
         { key: "VIXCLS", label: "VIX", value: round(latestRaw(macro.vix), 2) },
         { key: "VXVCLS", label: "VIX 3M", value: round(latestRaw(macro.vxv), 2) },
@@ -300,6 +563,7 @@ function computeMacroDerived(macro: MacroInputs, asOfDate: string): MacroDerived
         { key: "SOFR", label: "SOFR", value: round(latestRaw(macro.sofr), 2), unit: "%" },
         { key: "PUTCALL", label: "Put/Call", value: round(latestRaw(macro.putCall), 3) },
       ],
+      indicators,
       msiHistory,
     },
   };

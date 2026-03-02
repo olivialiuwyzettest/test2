@@ -65,11 +65,37 @@ export type MacroSnapshot = {
   oilShock: number;
   fundingStress: number;
   putCallZ: number;
+  cyclePhase:
+    | "panic_shock"
+    | "late_contraction"
+    | "late_cycle_tightening"
+    | "mid_cycle_expansion"
+    | "early_recovery"
+    | "transition";
+  cycleScore: number;
+  macroSummary: string;
+  decisionPlaybook: string[];
   keyReadings: Array<{
     key: string;
     label: string;
     value: number;
     unit?: string;
+  }>;
+  indicators: Array<{
+    key: string;
+    label: string;
+    value: number;
+    unit?: string;
+    betterWhen: "higher" | "lower";
+    dod: number | null;
+    mom: number | null;
+    yoy: number | null;
+    dodPct: number | null;
+    momPct: number | null;
+    yoyPct: number | null;
+    status: "improving" | "worsening" | "flat";
+    reitImpact: "tailwind" | "headwind" | "neutral";
+    interpretation: string;
   }>;
   msiHistory: Array<{
     date: string;

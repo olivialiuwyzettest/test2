@@ -31,6 +31,50 @@ function average(values: number[]): number | null {
   return total / values.length;
 }
 
+function signed(value: number, digits = 2): string {
+  const sign = value > 0 ? "+" : "";
+  return `${sign}${value.toFixed(digits)}`;
+}
+
+function formatDelta(
+  abs: number | null,
+  pctChange: number | null,
+  unit?: string,
+  digits = 2,
+): string {
+  if (abs === null) return "n/a";
+  const absolute = `${signed(abs, digits)}${unit ? ` ${unit}` : ""}`;
+  if (pctChange === null) return absolute;
+  return `${absolute} (${signed(pctChange, 2)}%)`;
+}
+
+function formatMacroValue(value: number, unit?: string): string {
+  const digits = Math.abs(value) >= 100 ? 0 : 3;
+  return `${value.toFixed(digits)}${unit ? ` ${unit}` : ""}`;
+}
+
+function cycleLabel(phase: string): string {
+  if (phase === "panic_shock") return "Panic Shock";
+  if (phase === "late_contraction") return "Late Contraction";
+  if (phase === "late_cycle_tightening") return "Late Cycle Tightening";
+  if (phase === "mid_cycle_expansion") return "Mid-Cycle Expansion";
+  if (phase === "early_recovery") return "Early Recovery";
+  return "Transition";
+}
+
+function cycleVariant(phase: string): "success" | "brand" | "neutral" | "danger" {
+  if (phase === "early_recovery" || phase === "mid_cycle_expansion") return "success";
+  if (phase === "transition") return "brand";
+  if (phase === "late_cycle_tightening") return "neutral";
+  return "danger";
+}
+
+function impactVariant(impact: string): "success" | "neutral" | "danger" {
+  if (impact === "tailwind") return "success";
+  if (impact === "headwind") return "danger";
+  return "neutral";
+}
+
 function signalLabel(signal: string): string {
   if (signal === "strong_buy") return "Strong Buy";
   if (signal === "buy_dip") return "Weak Buy";
@@ -115,6 +159,90 @@ export default async function ReitDashboardPage() {
             <div className="mt-3 text-xs text-muted-foreground">
               Recession risk score: {(snapshot.macro.recessionRisk * 100).toFixed(1)}
             </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="mb-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Macro Cycle Lens</CardTitle>
+            <CardDescription>
+              Translating macro numbers into cycle context and REIT purchase actions.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant={cycleVariant(snapshot.macro.cyclePhase)}>
+                {cycleLabel(snapshot.macro.cyclePhase)}
+              </Badge>
+              <span className="text-sm text-muted-foreground">
+                Cycle score {snapshot.macro.cycleScore.toFixed(1)} / 100
+              </span>
+            </div>
+
+            <div className="rounded-md border p-3 text-sm text-muted-foreground">
+              {snapshot.macro.macroSummary}
+            </div>
+
+            {snapshot.macro.decisionPlaybook.length ? (
+              <div className="grid gap-2">
+                {snapshot.macro.decisionPlaybook.map((step) => (
+                  <div key={step} className="rounded-md border p-3 text-sm text-muted-foreground">
+                    {step}
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="mb-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Macro Momentum (DoD / MoM / YoY)</CardTitle>
+            <CardDescription>
+              Each indicator includes direction, whether that is good or bad for REITs, and why it matters.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Indicator</TableHead>
+                  <TableHead className="text-right">Current</TableHead>
+                  <TableHead className="text-right">DoD</TableHead>
+                  <TableHead className="text-right">MoM</TableHead>
+                  <TableHead className="text-right">YoY</TableHead>
+                  <TableHead>Impact</TableHead>
+                  <TableHead>Interpretation</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {snapshot.macro.indicators.map((item) => (
+                  <TableRow key={item.key}>
+                    <TableCell className="font-medium">{item.label}</TableCell>
+                    <TableCell className="text-right">
+                      {formatMacroValue(item.value, item.unit)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatDelta(item.dod, item.dodPct, item.unit)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatDelta(item.mom, item.momPct, item.unit)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatDelta(item.yoy, item.yoyPct, item.unit)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={impactVariant(item.reitImpact)}>{item.reitImpact}</Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{item.interpretation}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       </section>

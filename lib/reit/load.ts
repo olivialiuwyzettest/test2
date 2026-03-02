@@ -18,8 +18,44 @@ function normalizeSnapshot(snapshot: ReitDashboardSnapshot): ReitDashboardSnapsh
 
   const ranked = rankedRaw.map(normalizeRecommendation);
 
+  const macroRaw = snapshot.macro as ReitDashboardSnapshot["macro"] & {
+    indicators?: ReitDashboardSnapshot["macro"]["indicators"];
+    cyclePhase?: ReitDashboardSnapshot["macro"]["cyclePhase"];
+    cycleScore?: ReitDashboardSnapshot["macro"]["cycleScore"];
+    macroSummary?: ReitDashboardSnapshot["macro"]["macroSummary"];
+    decisionPlaybook?: ReitDashboardSnapshot["macro"]["decisionPlaybook"];
+  };
+
+  const fallbackIndicators =
+    Array.isArray(macroRaw.keyReadings) && macroRaw.keyReadings.length
+      ? macroRaw.keyReadings.map((reading) => ({
+          key: reading.key,
+          label: reading.label,
+          value: reading.value,
+          unit: reading.unit,
+          betterWhen: "lower" as const,
+          dod: null,
+          mom: null,
+          yoy: null,
+          dodPct: null,
+          momPct: null,
+          yoyPct: null,
+          status: "flat" as const,
+          reitImpact: "neutral" as const,
+          interpretation: "Historical delta unavailable for this stored snapshot.",
+        }))
+      : [];
+
   return {
     ...snapshot,
+    macro: {
+      ...snapshot.macro,
+      cyclePhase: macroRaw.cyclePhase ?? "transition",
+      cycleScore: macroRaw.cycleScore ?? 50,
+      macroSummary: macroRaw.macroSummary ?? "Macro context unavailable for this stored snapshot.",
+      decisionPlaybook: macroRaw.decisionPlaybook ?? [],
+      indicators: Array.isArray(macroRaw.indicators) ? macroRaw.indicators : fallbackIndicators,
+    },
     ranked,
     recommendations: snapshot.recommendations.map(normalizeRecommendation),
     tail: snapshot.tail.map(normalizeRecommendation),
