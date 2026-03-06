@@ -19,8 +19,8 @@ function normalizeSnapshot(snapshot: ReitDashboardSnapshot): ReitDashboardSnapsh
       abortRule: "Entry plan unavailable for this stored snapshot.",
     },
     features: {
-      lastClose: item.features?.lastClose ?? 0,
       ...item.features,
+      lastClose: item.features?.lastClose ?? 0,
       ret5dPct: item.features?.ret5dPct ?? 0,
       ma200DistancePct: item.features?.ma200DistancePct ?? 0,
       distanceFrom20dLowPct: item.features?.distanceFrom20dLowPct ?? 0,
@@ -29,10 +29,10 @@ function normalizeSnapshot(snapshot: ReitDashboardSnapshot): ReitDashboardSnapsh
       dividendYieldPct: item.features?.dividendYieldPct ?? null,
     },
     components: {
+      ...item.components,
       confirmation: item.components?.confirmation ?? 0.5,
       yieldSupport: item.components?.yieldSupport ?? 0.5,
       riskPenalty: item.components?.riskPenalty ?? 1,
-      ...item.components,
     },
   });
 
