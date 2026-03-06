@@ -96,11 +96,13 @@ const BASE_UNIVERSE: Array<Omit<ReitUniverseItem, "aiStructural">> = [
 const BASE_UNIVERSE_BY_TICKER = new Map(BASE_UNIVERSE.map((item) => [item.ticker, item]));
 
 export const REIT_SCORE_WEIGHTS = {
-  dip: 0.35,
-  trend: 0.25,
-  macroAlignment: 0.2,
-  aiStructural: 0.1,
-  liquidity: 0.1,
+  dip: 0.26,
+  trend: 0.22,
+  macroAlignment: 0.18,
+  confirmation: 0.14,
+  yieldSupport: 0.1,
+  aiStructural: 0.05,
+  liquidity: 0.05,
 };
 
 export function normalizeTicker(ticker: string): string {

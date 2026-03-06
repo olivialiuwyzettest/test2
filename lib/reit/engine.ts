@@ -26,11 +26,14 @@ import {
   stdDev,
 } from "./math";
 import type {
+  BuyWindowStatus,
   MacroInputs,
   MacroSeriesPoint,
+  MarketDecisionSnapshot,
   MacroSnapshot,
   PriceBar,
   PropertyType,
+  RecommendationAction,
   ReitComputedFeatures,
   ReitDashboardSnapshot,
   ReitRecommendation,
@@ -55,6 +58,15 @@ type IndicatorDefinition = {
   why: string;
 };
 
+type DecisionFlags = {
+  macroClosed: boolean;
+  rateHeadwind: boolean;
+  brokenTrend: boolean;
+  stillFalling: boolean;
+  recessionPenalty: boolean;
+  highVolatility: boolean;
+};
+
 const DEFAULT_LOOKBACK_DAYS = 1_200;
 const DEFAULT_TOP_N = 12;
 const DEFAULT_LIQUIDITY_FLOOR_USD = 1_500_000;
@@ -69,6 +81,10 @@ function envNumber(name: string, fallback: number): number {
 
 function isoDate(date: Date): string {
   return format(date, "yyyy-MM-dd");
+}
+
+function formatPrice(value: number): string {
+  return `$${round(value, 2).toFixed(2)}`;
 }
 
 function sortedPoints(points: MacroSeriesPoint[]): MacroSeriesPoint[] {
@@ -341,6 +357,81 @@ function classifyCyclePhase(
   };
 }
 
+function classifyMacroBuyWindow(
+  msiLevel: number,
+  msiTrend5d: number,
+  recessionRisk: number,
+  ratePressure: number,
+): {
+  status: BuyWindowStatus;
+  score: number;
+  summary: string;
+  checklist: string[];
+} {
+  const score = round(
+    clamp(
+      100 -
+        clamp(msiLevel, 0, 1) * 32 -
+        clamp(recessionRisk, 0, 1) * 38 -
+        clamp((ratePressure + 1.2) / 2.4, 0, 1) * 18 +
+        (msiTrend5d < 0 ? 8 : 0),
+      0,
+      100,
+    ),
+    1,
+  );
+
+  if (msiLevel > 0.92 && msiTrend5d > 0) {
+    return {
+      status: "closed",
+      score,
+      summary: "Do not add new REIT risk while stress is extreme and still worsening.",
+      checklist: [
+        "Wait for Macro Stress Index 5-day trend to turn negative.",
+        "Avoid full-size entries even in high-quality names.",
+        "Keep new buys on hold until rates and credit spreads stabilize.",
+      ],
+    };
+  }
+
+  if (recessionRisk > 0.75 && msiTrend5d >= 0) {
+    return {
+      status: "closed",
+      score,
+      summary: "Recession risk is too elevated for broad REIT buying. Preserve cash and stay defensive.",
+      checklist: [
+        "Require defensive property types if you buy anything at all.",
+        "Use only starter-size entries after clear price stabilization.",
+        "Wait for claims, spreads, or the yield curve to stop deteriorating.",
+      ],
+    };
+  }
+
+  if ((msiLevel > 0.8 && msiTrend5d < 0) || (recessionRisk < 0.45 && ratePressure < 0.2 && msiLevel < 0.7)) {
+    return {
+      status: "open",
+      score,
+      summary: "The macro buy window is open. You can start new REIT positions if the individual chart confirms.",
+      checklist: [
+        "Prioritize Buy Now or Scale In names with conviction above 70.",
+        "Use staged entries instead of all-in orders.",
+        "Pause if 10Y yields re-accelerate upward over the next few sessions.",
+      ],
+    };
+  }
+
+  return {
+    status: "selective",
+    score,
+    summary: "The macro tape is mixed. Buy only the cleanest setups and size entries conservatively.",
+    checklist: [
+      "Require both macro alignment and price confirmation before buying.",
+      "Keep starter sizes small and add only after follow-through.",
+      "Favor liquid, defensive, or AI-tailwind property types over weaker sub-sectors.",
+    ],
+  };
+}
+
 function computeMacroDerived(macro: MacroInputs, asOfDate: string): MacroDerived {
   const allDates = [
     ...macro.vix,
@@ -459,7 +550,9 @@ function computeMacroDerived(macro: MacroInputs, asOfDate: string): MacroDerived
     msi: round(msi[historyStart + index] ?? 0, 4),
   }));
 
-  const cycle = classifyCyclePhase(msiLevel, msiTrend5d, recessionRisk, latestFinite(ratePressure));
+  const latestRatePressure = latestFinite(ratePressure);
+  const cycle = classifyCyclePhase(msiLevel, msiTrend5d, recessionRisk, latestRatePressure);
+  const buyWindow = classifyMacroBuyWindow(msiLevel, msiTrend5d, recessionRisk, latestRatePressure);
   const indicators: MacroIndicator[] = [
     buildIndicator({
       key: "VIXCLS",
@@ -533,7 +626,7 @@ function computeMacroDerived(macro: MacroInputs, asOfDate: string): MacroDerived
   ];
 
   return {
-    latestRatePressure: latestFinite(ratePressure),
+    latestRatePressure,
     latestRecessionRisk: recessionRisk,
     latestRiskGate: riskGate,
     snapshot: {
@@ -553,6 +646,10 @@ function computeMacroDerived(macro: MacroInputs, asOfDate: string): MacroDerived
       cycleScore: cycle.cycleScore,
       macroSummary: cycle.summary,
       decisionPlaybook: cycle.playbook,
+      buyWindowStatus: buyWindow.status,
+      buyWindowScore: buyWindow.score,
+      buyWindowSummary: buyWindow.summary,
+      pullTriggerChecklist: buyWindow.checklist,
       keyReadings: [
         { key: "VIXCLS", label: "VIX", value: round(latestRaw(macro.vix), 2) },
         { key: "VXVCLS", label: "VIX 3M", value: round(latestRaw(macro.vxv), 2) },
@@ -643,6 +740,8 @@ function computeFeatures(
   const closes = bars.map((bar) => bar.close);
   const latest = closes[closes.length - 1]!;
   const max252 = Math.max(...closes.slice(-252));
+  const low20 = Math.min(...closes.slice(-20));
+  const high20 = Math.max(...closes.slice(-20));
   const dd52w = safeDivide(latest, max252) - 1;
   const rsi14 = computeRsi14(closes);
   const ret5d = returns(closes, 5);
@@ -653,6 +752,16 @@ function computeFeatures(
   const maNow = rollingMean(closes, 200, closes.length - 1);
   const maPrev = rollingMean(closes, 200, closes.length - 21);
   const ma200Slope = maNow - maPrev;
+  const ma200Distance = safeDivide(latest, maNow) - 1;
+
+  const dailyReturns = bars
+    .slice(-21)
+    .map((bar, index, recent) => {
+      if (index === 0) return Number.NaN;
+      return safeDivide(bar.close - recent[index - 1]!.close, recent[index - 1]!.close);
+    })
+    .filter((value) => Number.isFinite(value));
+  const volatility20d = stdDev(dailyReturns);
 
   const liqUsd20d = meanTail(bars.slice(-20).map((bar) => bar.close * bar.volume), 20);
   const rateBeta = computeRateBeta(bars, dgs10ByDate);
@@ -662,12 +771,17 @@ function computeFeatures(
     name: item.name,
     propertyType: item.propertyType,
     aiStructural: item.aiStructural,
+    lastClose: latest,
     dd52w,
     rsi14,
     ret5d,
     ret20d,
     ret252d,
     ma200Slope,
+    ma200Distance,
+    distanceFrom20dLow: safeDivide(latest, low20) - 1,
+    distanceTo20dHigh: safeDivide(latest, high20) - 1,
+    volatility20d,
     rateBeta,
     liqUsd20d,
     dividendYieldPct: null,
@@ -690,14 +804,218 @@ function recessionTilt(propertyType: PropertyType, recessionRisk: number): numbe
   return 1;
 }
 
-function scoreToSignal(score: number): ReitRecommendation["signal"] {
-  if (score >= 75) return "strong_buy";
-  if (score >= 60) return "buy_dip";
-  if (score >= 45) return "watch";
+function computeConfirmationScore(feature: ReitComputedFeatures): number {
+  const shortMomentum = clamp((feature.ret5d + 0.04) / 0.08, 0, 1);
+  const bounce = 1 - clamp(Math.abs(feature.distanceFrom20dLow - 0.035) / 0.08, 0, 1);
+  const rsiWindow = 1 - clamp(Math.abs(feature.rsi14 - 40) / 24, 0, 1);
+  const maWindow = clamp((feature.ma200Distance + 0.08) / 0.18, 0, 1);
+
+  return clamp(0.35 * shortMomentum + 0.3 * bounce + 0.2 * rsiWindow + 0.15 * maWindow, 0, 1);
+}
+
+function buildDecisionFlags(feature: ReitComputedFeatures, macro: MacroDerived): DecisionFlags {
+  return {
+    macroClosed: macro.snapshot.buyWindowStatus === "closed" || macro.snapshot.regime === "panic_worsening",
+    rateHeadwind: macro.latestRatePressure > 0.55 && feature.rateBeta > 0.25,
+    brokenTrend: feature.ret252d < -0.15 && feature.ma200Slope < 0,
+    stillFalling: feature.ret5d < -0.03 && feature.distanceFrom20dLow < 0.015,
+    recessionPenalty:
+      macro.latestRecessionRisk > 0.7 && CYCLICAL_PROPERTY_TYPES.has(feature.propertyType),
+    highVolatility: feature.volatility20d > 0.028,
+  };
+}
+
+function buildBlockers(flags: DecisionFlags): string[] {
+  const blockers: string[] = [];
+
+  if (flags.macroClosed) {
+    blockers.push("Macro buy window is closed. Broad REIT buying should wait.");
+  }
+  if (flags.rateHeadwind) {
+    blockers.push("Rates are still rising against a rate-sensitive REIT.");
+  }
+  if (flags.brokenTrend) {
+    blockers.push("Long-term trend is still broken.");
+  }
+  if (flags.stillFalling) {
+    blockers.push("Price is still falling without a clear stabilization bounce.");
+  }
+  if (flags.recessionPenalty) {
+    blockers.push("Recession gate penalizes this cyclical property type.");
+  }
+  if (flags.highVolatility) {
+    blockers.push("Recent volatility is elevated, so entry risk is higher.");
+  }
+
+  return blockers;
+}
+
+function buildUpgradeTriggers(feature: ReitComputedFeatures, macro: MacroDerived, flags: DecisionFlags): string[] {
+  const upgrades: string[] = [];
+
+  if (flags.stillFalling || feature.ret5d <= 0) {
+    upgrades.push("Wait for the 5-day return to turn positive.");
+  }
+  if (feature.distanceFrom20dLow < 0.03) {
+    upgrades.push("Wait for price to hold 2%-4% above the 20-day low.");
+  }
+  if (flags.brokenTrend || feature.ret20d <= 0) {
+    upgrades.push("Require a better 20-day trend or a flattening 200-day slope.");
+  }
+  if (flags.rateHeadwind) {
+    upgrades.push("Prefer a flat-to-down 10Y yield trend before adding aggressively.");
+  }
+  if (flags.macroClosed) {
+    upgrades.push("Need the macro buy window to reopen before treating this as a true buy.");
+  }
+  if (!upgrades.length && macro.snapshot.buyWindowStatus !== "closed") {
+    upgrades.push("If macro stays stable for another 1-2 sessions, conviction improves.");
+  }
+
+  return upgrades.slice(0, 3);
+}
+
+function computeRiskPenalty(feature: ReitComputedFeatures, flags: DecisionFlags): number {
+  let penalty = 1;
+
+  if (flags.macroClosed) penalty -= 0.18;
+  if (flags.rateHeadwind) penalty -= 0.08;
+  if (flags.brokenTrend) penalty -= 0.14;
+  if (flags.stillFalling) penalty -= 0.1;
+  if (flags.recessionPenalty) penalty -= 0.1;
+  if (flags.highVolatility) penalty -= 0.06;
+  if (feature.distanceTo20dHigh > -0.02) penalty -= 0.03;
+
+  return clamp(penalty, 0.5, 1);
+}
+
+function decideAction(
+  score: number,
+  timingScore: number,
+  conviction: number,
+  flags: DecisionFlags,
+  macro: MacroDerived,
+): RecommendationAction {
+  const majorBlockers = [flags.macroClosed, flags.brokenTrend, flags.stillFalling, flags.recessionPenalty].filter(
+    Boolean,
+  ).length;
+
+  if (flags.macroClosed || score < 42 || majorBlockers >= 3) {
+    return "avoid";
+  }
+
+  if (
+    score >= 76 &&
+    timingScore >= 68 &&
+    conviction >= 72 &&
+    majorBlockers === 0 &&
+    macro.latestRiskGate >= 0.7
+  ) {
+    return "buy_now";
+  }
+
+  if (score >= 62 && timingScore >= 52 && conviction >= 60 && majorBlockers <= 1 && macro.latestRiskGate >= 0.7) {
+    return "scale_in";
+  }
+
+  if (score >= 48 || timingScore >= 44 || conviction >= 52) {
+    return "wait_for_confirmation";
+  }
+
+  return "avoid";
+}
+
+function signalFromAction(action: RecommendationAction): ReitRecommendation["signal"] {
+  if (action === "buy_now") return "strong_buy";
+  if (action === "scale_in") return "buy_dip";
+  if (action === "wait_for_confirmation") return "watch";
   return "hold_back";
 }
 
-function buildRationale(features: ReitComputedFeatures, score: number, regime: MacroSnapshot["regime"]): string[] {
+function buildDecisionSummary(
+  action: RecommendationAction,
+  feature: ReitComputedFeatures,
+  macro: MacroDerived,
+): string {
+  if (action === "buy_now") {
+    return "Pull the trigger on a starter position. The selloff has stabilized and the macro tape is supportive enough.";
+  }
+
+  if (action === "scale_in") {
+    return "Attractive dip, but not a full-size entry. Start small and add only after price follow-through.";
+  }
+
+  if (action === "wait_for_confirmation") {
+    return "Good watchlist candidate, but the chart or macro tape has not confirmed the buy yet.";
+  }
+
+  if (macro.snapshot.buyWindowStatus === "closed") {
+    return "Do not buy yet. The macro buy window is closed, so patience matters more than ranking.";
+  }
+
+  if (feature.ret252d < -0.15) {
+    return "Do not buy yet. The long-term downtrend still looks broken.";
+  }
+
+  return "Do not buy yet. Too many headwinds remain active.";
+}
+
+function buildEntryPlan(
+  action: RecommendationAction,
+  feature: ReitComputedFeatures,
+): ReitRecommendation["entryPlan"] {
+  const retestLevel = feature.lastClose * 0.97;
+  const breakoutLevel = feature.lastClose * 1.01;
+  const low20 = feature.lastClose / Math.max(1 + feature.distanceFrom20dLow, 0.0001);
+  const abortLevel = low20 * 0.98;
+
+  if (action === "buy_now") {
+    return {
+      starterSizePct: 35,
+      maxSizePct: 100,
+      buyRule: `Start 35% of target size near ${formatPrice(feature.lastClose)} on the next session.`,
+      addRule: `Add 35% on a controlled retest near ${formatPrice(retestLevel)} or after a close above ${formatPrice(
+        breakoutLevel,
+      )}.`,
+      abortRule: `Pause buying if price closes below ${formatPrice(abortLevel)}.`,
+    };
+  }
+
+  if (action === "scale_in") {
+    return {
+      starterSizePct: 20,
+      maxSizePct: 75,
+      buyRule: `Start with 20% only if price holds near ${formatPrice(feature.lastClose)} instead of breaking lower.`,
+      addRule: `Add 25% only after a close above ${formatPrice(breakoutLevel)} and a positive 5-day return.`,
+      abortRule: `Stand aside if price closes below ${formatPrice(abortLevel)}.`,
+    };
+  }
+
+  if (action === "wait_for_confirmation") {
+    return {
+      starterSizePct: 0,
+      maxSizePct: 50,
+      buyRule: `Do not buy yet. Trigger only after a close above ${formatPrice(breakoutLevel)} with better follow-through.`,
+      addRule: "If that happens, begin with a 20% starter position rather than full size.",
+      abortRule: `Remove from active watch if price closes below ${formatPrice(abortLevel)}.`,
+    };
+  }
+
+  return {
+    starterSizePct: 0,
+    maxSizePct: 0,
+    buyRule: "No entry while current blockers remain active.",
+    addRule: "Revisit only after macro and price trend both improve.",
+    abortRule: `No buy if price remains below ${formatPrice(breakoutLevel)} and macro pressure persists.`,
+  };
+}
+
+function buildRationale(
+  features: ReitComputedFeatures,
+  score: number,
+  action: RecommendationAction,
+  regime: MacroSnapshot["regime"],
+): string[] {
   const notes: string[] = [];
 
   if (features.dd52w <= -0.2) {
@@ -724,6 +1042,14 @@ function buildRationale(features: ReitComputedFeatures, score: number, regime: M
     notes.push("Macro panic regime improving");
   }
 
+  if (action === "buy_now") {
+    notes.push("Price action is stabilizing enough for a starter entry");
+  }
+
+  if (action === "scale_in") {
+    notes.push("Use staged buying instead of full-size entry");
+  }
+
   if (score < 45 && !notes.length) {
     notes.push("Macro and technical setup not aligned");
   }
@@ -731,36 +1057,159 @@ function buildRationale(features: ReitComputedFeatures, score: number, regime: M
   return notes.slice(0, 4);
 }
 
+function buildMarketDecision(
+  recommendations: ReitRecommendation[],
+  macro: MacroDerived,
+): MarketDecisionSnapshot {
+  const total = Math.max(recommendations.length, 1);
+  const oversoldCount = recommendations.filter(
+    (item) => item.features.dd52wPct <= -15 || item.features.rsi14 <= 35,
+  ).length;
+  const positive5dCount = recommendations.filter((item) => item.features.ret5dPct > 0).length;
+  const positiveTrendCount = recommendations.filter(
+    (item) => item.features.ret252dPct > 0 || item.features.ma200DistancePct > 0,
+  ).length;
+  const buyNowCount = recommendations.filter((item) => item.action === "buy_now").length;
+  const scaleInCount = recommendations.filter((item) => item.action === "scale_in").length;
+
+  const breadthScore = clamp(
+    100 *
+      (0.4 * (positive5dCount / total) +
+        0.35 * (positiveTrendCount / total) +
+        0.25 * clamp((buyNowCount + scaleInCount) / Math.max(total * 0.4, 1), 0, 1)),
+    0,
+    100,
+  );
+
+  let status: BuyWindowStatus = macro.snapshot.buyWindowStatus;
+  const score = round(0.65 * macro.snapshot.buyWindowScore + 0.35 * breadthScore, 1);
+
+  if (macro.snapshot.buyWindowStatus !== "closed") {
+    if (score >= 72 && buyNowCount >= 2 && positive5dCount / total >= 0.4) {
+      status = "open";
+    } else if (score >= 52 && buyNowCount + scaleInCount >= 3) {
+      status = "selective";
+    } else {
+      status = "closed";
+    }
+  }
+
+  const summary =
+    status === "open"
+      ? "Pull the trigger only on Buy Now names. Market breadth and macro are aligned enough for new REIT exposure."
+      : status === "selective"
+        ? "Be selective. Buy only the highest-conviction names and use staged entries."
+        : "Wait. Macro and breadth are not strong enough to justify fresh REIT buying.";
+
+  const triggerThreshold = status === "open" ? 68 : 74;
+
+  return {
+    status,
+    score,
+    summary,
+    pullTriggerRule:
+      status === "closed"
+        ? "No new buys until the market buy window improves."
+        : `Only buy tickers marked ${status === "open" ? "Buy Now" : "Buy Now or Scale In"} with conviction above ${triggerThreshold}.`,
+    breadth: {
+      oversoldPct: round((oversoldCount / total) * 100, 1),
+      positive5dPct: round((positive5dCount / total) * 100, 1),
+      positiveTrendPct: round((positiveTrendCount / total) * 100, 1),
+      buyNowCount,
+      scaleInCount,
+    },
+    checklist:
+      status === "open"
+        ? [
+            "Start with the top Buy Now names only.",
+            "Use 25%-35% starter size instead of full-size entries.",
+            "Stop adding if macro buy window falls back to Selective or Closed.",
+          ]
+        : status === "selective"
+          ? [
+              "Limit new buys to the best 2-4 setups.",
+              "Require price confirmation before every add.",
+              "Favor liquid, defensive, or AI-tailwind property types.",
+            ]
+          : [
+              "Stay in watch mode rather than forcing buys.",
+              "Wait for stronger breadth and a friendlier macro tape.",
+              "Keep dry powder for a cleaner entry window.",
+            ],
+  };
+}
+
 function scoreRecommendations(
   features: ReitComputedFeatures[],
   macro: MacroDerived,
   topN: number,
-): { ranked: ReitRecommendation[]; recommendations: ReitRecommendation[]; tail: ReitRecommendation[] } {
+): {
+  ranked: ReitRecommendation[];
+  recommendations: ReitRecommendation[];
+  tail: ReitRecommendation[];
+  marketDecision: MarketDecisionSnapshot;
+} {
   const ddRank = scoreByRank(features.map((f) => f.dd52w), "lower");
   const rsiRank = scoreByRank(features.map((f) => f.rsi14), "lower");
+  const ret5Rank = scoreByRank(features.map((f) => f.ret5d), "higher");
   const ret20Rank = scoreByRank(features.map((f) => f.ret20d), "lower");
 
   const ret252Rank = scoreByRank(features.map((f) => f.ret252d), "higher");
   const maRank = scoreByRank(features.map((f) => f.ma200Slope), "higher");
+  const maDistanceRank = scoreByRank(features.map((f) => f.ma200Distance), "higher");
 
   const liquidityRank = scoreByRank(features.map((f) => f.liqUsd20d), "higher");
+  const volatilityRank = scoreByRank(features.map((f) => f.volatility20d), "lower");
+  const yieldRankRaw = scoreByRank(
+    features.map((f) => (f.dividendYieldPct === null ? Number.NaN : f.dividendYieldPct)),
+    "higher",
+  );
+  const yieldRank = yieldRankRaw.map((value, index) =>
+    features[index]!.dividendYieldPct === null ? 0.45 : value,
+  );
 
   const recommendations = features.map((feature, index) => {
-    const dip = 0.5 * ddRank[index]! + 0.3 * rsiRank[index]! + 0.2 * ret20Rank[index]!;
-    const trend = 0.6 * ret252Rank[index]! + 0.4 * maRank[index]!;
+    const dip =
+      0.45 * ddRank[index]! +
+      0.2 * rsiRank[index]! +
+      0.15 * ret20Rank[index]! +
+      0.2 * yieldRank[index]!;
+    const trend =
+      0.45 * ret252Rank[index]! + 0.25 * maRank[index]! + 0.2 * maDistanceRank[index]! + 0.1 * ret5Rank[index]!;
     const macroAlignment = sigmoid(-macro.latestRatePressure * feature.rateBeta * 1.4);
+    const confirmation = computeConfirmationScore(feature);
+    const yieldSupport = yieldRank[index]!;
     const aiStructural = aiScoreToUnit(feature.aiStructural);
     const liquidity = liquidityRank[index]!;
     const tilt = recessionTilt(feature.propertyType, macro.latestRecessionRisk);
+    const flags = buildDecisionFlags(feature, macro);
+    const riskPenalty = computeRiskPenalty(feature, flags) * (0.85 + 0.15 * volatilityRank[index]!);
 
     const raw =
-      REIT_SCORE_WEIGHTS.dip * dip +
-      REIT_SCORE_WEIGHTS.trend * trend +
-      REIT_SCORE_WEIGHTS.macroAlignment * macroAlignment +
-      REIT_SCORE_WEIGHTS.aiStructural * aiStructural +
-      REIT_SCORE_WEIGHTS.liquidity * liquidity;
+      0.26 * dip +
+      0.22 * trend +
+      0.18 * macroAlignment +
+      0.14 * confirmation +
+      0.1 * yieldSupport +
+      0.05 * aiStructural +
+      0.05 * liquidity;
 
-    const score = clamp(100 * macro.latestRiskGate * raw * tilt, 0, 100);
+    const score = clamp(100 * macro.latestRiskGate * raw * tilt * riskPenalty, 0, 100);
+    const timingScore =
+      100 *
+      clamp(
+        (0.45 * confirmation +
+          0.2 * macroAlignment +
+          0.15 * yieldSupport +
+          0.2 * (0.6 * ret5Rank[index]! + 0.4 * maDistanceRank[index]!)) *
+          (0.75 + 0.25 * macro.latestRiskGate),
+        0,
+        1,
+      );
+    const conviction = clamp(0.65 * score + 0.35 * timingScore, 0, 100);
+    const action = decideAction(score, timingScore, conviction, flags, macro);
+    const blockers = buildBlockers(flags).slice(0, 3);
+    const upgradeTriggers = buildUpgradeTriggers(feature, macro, flags);
 
     const recommendation: ReitRecommendation = {
       ticker: feature.ticker,
@@ -768,13 +1217,26 @@ function scoreRecommendations(
       propertyType: feature.propertyType,
       score: round(score, 2),
       rank: 0,
-      signal: scoreToSignal(score),
-      rationale: buildRationale(feature, score, macro.snapshot.regime),
+      action,
+      conviction: round(conviction, 1),
+      timingScore: round(timingScore, 1),
+      signal: signalFromAction(action),
+      decisionSummary: buildDecisionSummary(action, feature, macro),
+      blockers,
+      upgradeTriggers,
+      entryPlan: buildEntryPlan(action, feature),
+      rationale: buildRationale(feature, score, action, macro.snapshot.regime),
       features: {
+        lastClose: round(feature.lastClose, 2),
         dd52wPct: round(feature.dd52w * 100, 2),
         rsi14: round(feature.rsi14, 2),
+        ret5dPct: round(feature.ret5d * 100, 2),
         ret20dPct: round(feature.ret20d * 100, 2),
         ret252dPct: round(feature.ret252d * 100, 2),
+        ma200DistancePct: round(feature.ma200Distance * 100, 2),
+        distanceFrom20dLowPct: round(feature.distanceFrom20dLow * 100, 2),
+        distanceTo20dHighPct: round(feature.distanceTo20dHigh * 100, 2),
+        volatility20dPct: round(feature.volatility20d * 100, 2),
         rateBeta: round(feature.rateBeta, 3),
         liqUsd20d: round(feature.liqUsd20d, 0),
         dividendYieldPct:
@@ -784,24 +1246,34 @@ function scoreRecommendations(
         dip: round(dip, 4),
         trend: round(trend, 4),
         macroAlignment: round(macroAlignment, 4),
+        confirmation: round(confirmation, 4),
+        yieldSupport: round(yieldSupport, 4),
         aiStructural: round(aiStructural, 4),
         liquidity: round(liquidity, 4),
         recessionTilt: round(tilt, 4),
+        riskPenalty: round(riskPenalty, 4),
       },
     };
 
     return recommendation;
   });
 
-  recommendations.sort((a, b) => b.score - a.score);
+  recommendations.sort((a, b) => {
+    if (b.conviction !== a.conviction) return b.conviction - a.conviction;
+    if (b.score !== a.score) return b.score - a.score;
+    return b.timingScore - a.timingScore;
+  });
   recommendations.forEach((item, index) => {
     item.rank = index + 1;
   });
+
+  const marketDecision = buildMarketDecision(recommendations, macro);
 
   return {
     ranked: recommendations,
     recommendations: recommendations.slice(0, topN),
     tail: recommendations.slice(-5),
+    marketDecision,
   };
 }
 
@@ -850,7 +1322,11 @@ export async function buildReitSnapshot(asOf = new Date()): Promise<ReitDashboar
     dividendYieldPct: yieldByTicker.get(item.ticker) ?? null,
   }));
 
-  const { ranked, recommendations, tail } = scoreRecommendations(featuresWithYield, macroDerived, topN);
+  const { ranked, recommendations, tail, marketDecision } = scoreRecommendations(
+    featuresWithYield,
+    macroDerived,
+    topN,
+  );
 
   const notes: string[] = [];
   if (macroDerived.snapshot.regime === "panic_worsening") {
@@ -861,6 +1337,11 @@ export async function buildReitSnapshot(asOf = new Date()): Promise<ReitDashboar
   }
   if (skippedForLiquidity > 0) {
     notes.push(`${skippedForLiquidity} names were excluded by liquidity filter.`);
+  }
+  if (marketDecision.status === "closed") {
+    notes.push("Market buy window is closed. Wait for better macro plus breadth before opening new positions.");
+  } else if (marketDecision.status === "selective") {
+    notes.push("Market buy window is selective. Use staged entries and focus on the highest-conviction setups.");
   }
 
   return {
@@ -876,11 +1357,14 @@ export async function buildReitSnapshot(asOf = new Date()): Promise<ReitDashboar
         dip: REIT_SCORE_WEIGHTS.dip,
         trend: REIT_SCORE_WEIGHTS.trend,
         macroAlignment: REIT_SCORE_WEIGHTS.macroAlignment,
+        confirmation: REIT_SCORE_WEIGHTS.confirmation,
+        yieldSupport: REIT_SCORE_WEIGHTS.yieldSupport,
         aiStructural: REIT_SCORE_WEIGHTS.aiStructural,
         liquidity: REIT_SCORE_WEIGHTS.liquidity,
       },
     },
     macro: macroDerived.snapshot,
+    marketDecision,
     ranked,
     recommendations,
     tail,

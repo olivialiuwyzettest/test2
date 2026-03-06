@@ -13,6 +13,14 @@ export type PropertyType =
   | "specialty"
   | "other";
 
+export type BuyWindowStatus = "open" | "selective" | "closed";
+
+export type RecommendationAction =
+  | "buy_now"
+  | "scale_in"
+  | "wait_for_confirmation"
+  | "avoid";
+
 export type ReitUniverseItem = {
   ticker: string;
   name: string;
@@ -75,6 +83,10 @@ export type MacroSnapshot = {
   cycleScore: number;
   macroSummary: string;
   decisionPlaybook: string[];
+  buyWindowStatus: BuyWindowStatus;
+  buyWindowScore: number;
+  buyWindowSummary: string;
+  pullTriggerChecklist: string[];
   keyReadings: Array<{
     key: string;
     label: string;
@@ -108,12 +120,17 @@ export type ReitComputedFeatures = {
   name: string;
   propertyType: PropertyType;
   aiStructural: number;
+  lastClose: number;
   dd52w: number;
   rsi14: number;
   ret5d: number;
   ret20d: number;
   ret252d: number;
   ma200Slope: number;
+  ma200Distance: number;
+  distanceFrom20dLow: number;
+  distanceTo20dHigh: number;
+  volatility20d: number;
   rateBeta: number;
   liqUsd20d: number;
   dividendYieldPct: number | null;
@@ -125,13 +142,32 @@ export type ReitRecommendation = {
   propertyType: PropertyType;
   score: number;
   rank: number;
+  action: RecommendationAction;
+  conviction: number;
+  timingScore: number;
   signal: "strong_buy" | "buy_dip" | "watch" | "hold_back";
+  decisionSummary: string;
+  blockers: string[];
+  upgradeTriggers: string[];
+  entryPlan: {
+    starterSizePct: number;
+    maxSizePct: number;
+    buyRule: string;
+    addRule: string;
+    abortRule: string;
+  };
   rationale: string[];
   features: {
+    lastClose: number;
     dd52wPct: number;
     rsi14: number;
+    ret5dPct: number;
     ret20dPct: number;
     ret252dPct: number;
+    ma200DistancePct: number;
+    distanceFrom20dLowPct: number;
+    distanceTo20dHighPct: number;
+    volatility20dPct: number;
     rateBeta: number;
     liqUsd20d: number;
     dividendYieldPct: number | null;
@@ -140,10 +176,28 @@ export type ReitRecommendation = {
     dip: number;
     trend: number;
     macroAlignment: number;
+    confirmation: number;
+    yieldSupport: number;
     aiStructural: number;
     liquidity: number;
     recessionTilt: number;
+    riskPenalty: number;
   };
+};
+
+export type MarketDecisionSnapshot = {
+  status: BuyWindowStatus;
+  score: number;
+  summary: string;
+  pullTriggerRule: string;
+  breadth: {
+    oversoldPct: number;
+    positive5dPct: number;
+    positiveTrendPct: number;
+    buyNowCount: number;
+    scaleInCount: number;
+  };
+  checklist: string[];
 };
 
 export type ReitDashboardSnapshot = {
@@ -159,11 +213,14 @@ export type ReitDashboardSnapshot = {
       dip: number;
       trend: number;
       macroAlignment: number;
+      confirmation: number;
+      yieldSupport: number;
       aiStructural: number;
       liquidity: number;
     };
   };
   macro: MacroSnapshot;
+  marketDecision: MarketDecisionSnapshot;
   ranked: ReitRecommendation[];
   recommendations: ReitRecommendation[];
   tail: ReitRecommendation[];
